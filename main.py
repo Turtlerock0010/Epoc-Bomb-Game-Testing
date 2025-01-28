@@ -285,6 +285,7 @@ while running:
             running = False
     
     #sound controls
+    key = game.key.get_pressed()
     if key[game.K_m]:
             if volume:
                 sound.set_volume(0) 
@@ -296,9 +297,8 @@ while running:
                 volume = True
       
     #game code
-    screen.fill("white")
     if mainloop == False:
-        key = game.key.get_pressed()
+        screen.fill("gray")
         if key[game.K_b]:
             mainloop = True
         
@@ -312,6 +312,7 @@ while running:
             
 
     if mainloop:
+        screen.fill("white")
         #--detail draw--
 
         #grid lines
