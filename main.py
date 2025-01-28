@@ -264,7 +264,7 @@ sidePanel = game.Rect(575,0,225,600)
 #---end of game init---
 
 #game loop
-
+volume = True
 running = True
 mainloop = False
 while running:
@@ -288,6 +288,14 @@ while running:
         screen.blit(newimage,(250,100))
 
         #sound
+        if key[game.K_m]:
+            if volume:
+                sound.set_volume(0) 
+                volume = False
+            else:
+                sound.set_volume(1) 
+                volume = True
+            
 
     if mainloop:
         #detail draw
@@ -360,6 +368,15 @@ while running:
         #checks for remaining shards
         shardLeft = len([s for s in shard_group if isinstance(s, Shard)])
         print(shardLeft)
+
+        #sound
+        if key[game.K_m]:
+            if volume:
+                sound.set_volume(0) 
+                volume = False
+            else:
+                sound.set_volume(1) 
+                volume = True
 
     time.sleep(0.08333)
     game.display.update()
