@@ -392,6 +392,7 @@ while running:
             for target in all_sprites.sprites():
                 if isinstance(target, Target):
                     all_sprites.remove(target)
+                    targetsLeft = 0
 
         if key[game.K_u]:
             directions = ["up", "down", "left", "right", "up_left", "up_right", "down_left", "down_right"]
