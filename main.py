@@ -283,6 +283,17 @@ while running:
     for event in game.event.get():
         if event.type == game.QUIT:
             running = False
+    
+    #sound controls
+    if key[game.K_m]:
+            if volume:
+                sound.set_volume(0) 
+                hit.set_volume(0)
+                volume = False
+            else:
+                sound.set_volume(1) 
+                hit.set_volume(1)
+                volume = True
       
     #game code
     screen.fill("white")
@@ -298,17 +309,6 @@ while running:
         #image
         newimage = game.transform.scale(game.image.load('icon.png'), (300, 300))
         screen.blit(newimage,(250,100))
-
-        #sound
-        if key[game.K_m]:
-            if volume:
-                sound.set_volume(0)
-                hit.set_volume(0) 
-                volume = False
-            else:
-                sound.set_volume(1) 
-                hit.set_volume(1)
-                volume = True
             
 
     if mainloop:
@@ -402,17 +402,6 @@ while running:
         #checks for remaining shards
         shardLeft = len([s for s in shard_group if isinstance(s, Shard)])
         print(shardLeft)
-
-        #sound
-        if key[game.K_m]:
-            if volume:
-                sound.set_volume(0) 
-                hit.set_volume(0)
-                volume = False
-            else:
-                sound.set_volume(1) 
-                hit.set_volume(1)
-                volume = True
 
     time.sleep(0.08333)
     game.display.update()
