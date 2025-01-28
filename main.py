@@ -32,6 +32,8 @@ bombs = 3
 bombsLeft = 3
 bombX = []
 bombY = []
+score = 0
+volume = True
 
 #--class init--
 class Player(game.sprite.Sprite):
@@ -86,10 +88,12 @@ class Target(game.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+        global score
 
     def update(self):
         if game.sprite.spritecollideany(self, shard_group):
             self.kill()
+            score += 100
 
     def move(self, dx, dy):
         # Update the sprite's position and store it
@@ -264,7 +268,6 @@ sidePanel = game.Rect(575,0,225,600)
 #---end of game init---
 
 #game loop
-volume = True
 running = True
 mainloop = False
 while running:
@@ -377,6 +380,8 @@ while running:
             else:
                 sound.set_volume(1) 
                 volume = True
+        
+        writeText("Score: " + str(score), "Arial",255,255,255,650,450)
 
     time.sleep(0.08333)
     game.display.update()
