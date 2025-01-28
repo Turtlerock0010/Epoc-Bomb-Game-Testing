@@ -23,7 +23,8 @@ game.display.set_icon(icon_image)
 
 #music init
 game.mixer.init()
-sound = game.mixer.Sound("theme.mp3")
+sound = game.mixer.Sound("sounds/theme.mp3")
+hit = game.mixer.Sound("sounds/hit.wav")
 sound.play(-1)
 
 #var init
@@ -99,6 +100,8 @@ class Target(game.sprite.Sprite):
             global targetsLeft
             score += 100
             targetsLeft -= 1
+            global hit
+            hit.play()
 
     def move(self, dx, dy):
         # Update the sprite's position and store it
@@ -299,10 +302,12 @@ while running:
         #sound
         if key[game.K_m]:
             if volume:
-                sound.set_volume(0) 
+                sound.set_volume(0)
+                hit.set_volume(0) 
                 volume = False
             else:
                 sound.set_volume(1) 
+                hit.set_volume(1)
                 volume = True
             
 
@@ -402,9 +407,11 @@ while running:
         if key[game.K_m]:
             if volume:
                 sound.set_volume(0) 
+                hit.set_volume(0)
                 volume = False
             else:
                 sound.set_volume(1) 
+                hit.set_volume(1)
                 volume = True
 
     time.sleep(0.08333)
