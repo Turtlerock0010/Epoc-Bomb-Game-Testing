@@ -12,7 +12,7 @@ game.init()
 
 #display init
 screen = game.display.set_mode((800,600))
-game.display.set_caption("Epic Bomb Game")
+game.display.set_caption("Epoc Bomb Game Thing")
 
 #icon init
 icon_image = game.image.load("icon.png")
@@ -34,6 +34,7 @@ bombX = []
 bombY = []
 score = 0
 volume = True
+targetsLeft = 0
 
 #--class init--
 class Player(game.sprite.Sprite):
@@ -88,12 +89,16 @@ class Target(game.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+        global targetsLeft
+        targetsLeft += 1
 
     def update(self):
         if game.sprite.spritecollideany(self, shard_group):
             self.kill()
             global score
+            global targetsLeft
             score += 100
+            targetsLeft -= 1
 
     def move(self, dx, dy):
         # Update the sprite's position and store it
@@ -263,7 +268,7 @@ wall_group.add(rightBorder)
 
 #detail init
 sidePanel = game.Rect(575,0,225,600)
-infoBox = game.Rect(600,400,200,200)
+infoBox = game.Rect(560,400,230,190)
 #--end of sprite init--
 
 #---end of game init---
@@ -302,21 +307,36 @@ while running:
             
 
     if mainloop:
-        #detail draw
-        game.draw.rect(screen, (92, 92, 92), sidePanel)
-        game.draw.rect(screen, (70, 70, 70), infoBox)
+        #--detail draw--
 
+        #grid lines
         for i in range(21):
             game.draw.line(screen, (0, 0, 0), (i * 25+25,25),(i * 25+25,550))
         for i in range(21):
             game.draw.line(screen, (0, 0, 0), (25,i * 25+25),(550,i * 25+25))
-        
-        writeText("Score: " + str(score), "Arial",255,255,255,665,425)
-        writeText("Targets: " + "[null]", "Arial",255,255,255,700,470)
-        writeText("Round: " + "[null]", "Arial",255,255,255,700,515)
 
-        newimage = game.transform.scale(game.image.load('icon.png'), (200, 200))
-        screen.blit(newimage,(575,50))
+        #functional components
+        all_sprites.update()
+        all_sprites.draw(screen)
+
+        #boxes
+        game.draw.rect(screen, (92, 92, 92), sidePanel)
+        game.draw.rect(screen, (70, 70, 70), infoBox)
+        
+        #info box text
+        writeText("Score: " + str(score), "Arial",255,255,255,650,425)
+        writeText("Targets: " + str(targetsLeft), "Arial",255,255,255,650,470)
+        writeText("Round: " + "[null]", "Arial",255,255,255,650,515)
+
+        #logo image
+        newimage = game.transform.scale(game.image.load('icon.png'), (150, 150))
+        screen.blit(newimage,(600,50))
+
+        #logo text
+        writeText("Epoc Bomb", "Arial",200,200,200,675,250)
+        writeText("Game Thing", "Arial",200,200,200,675,300)
+
+        #--End of Detail Draw--
 
         #player actions
         key = game.key.get_pressed()
@@ -373,9 +393,6 @@ while running:
                 shard = Shard(player.rect.x, player.rect.y, 25, 25, direction)
                 all_sprites.add(shard)
                 shard_group.add(shard)
-
-        all_sprites.update()
-        all_sprites.draw(screen)
 
         #checks for remaining shards
         shardLeft = len([s for s in shard_group if isinstance(s, Shard)])
