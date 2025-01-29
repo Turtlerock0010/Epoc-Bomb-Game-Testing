@@ -275,6 +275,11 @@ all_sprites.add(rightBorder)
 wall_group.add(rightBorder)
 
 #detail init
+
+#start detail
+playButton = game.Rect(275,525,250,50)
+
+#game detail
 sidePanel = game.Rect(575,0,225,600)
 infoBox = game.Rect(560,400,230,190)
 #--end of sprite init--
@@ -307,6 +312,9 @@ while running:
         if key[game.K_b]:
             mainloop = True
         
+        #boxes
+        game.draw.rect(screen, (92, 92, 92), playButton, 2, 10)
+
         #text
         writeText("Press B To Begin", "Arial",0,0,0,400,550)
         writeText("Epoc Bomb Game Thing", "Arial",0,0,0,400,450)
@@ -314,7 +322,6 @@ while running:
         #image
         newimage = game.transform.scale(game.image.load('icon.png'), (300, 300))
         screen.blit(newimage,(250,100))
-            
 
     if mainloop:
         screen.fill("white")
@@ -338,6 +345,7 @@ while running:
         writeText("Score: " + str(score), "Arial",255,255,255,650,425)
         writeText("Targets: " + str(targetsLeft), "Arial",255,255,255,650,470)
         writeText("Round: " + str(round), "Arial",255,255,255,650,515)
+        writeText("Bombs: " + str(bombsLeft), "Arial",255,255,255,650,560)
 
         #logo image
         newimage = game.transform.scale(game.image.load('icon.png'), (150, 150))
@@ -387,7 +395,7 @@ while running:
                     all_sprites.remove(bomb)
                     bombX.clear()
                     bombY.clear()
-            bombsLeft = -1
+            #possibly important code: bombsLeft = -1
 
         if bombCooldown > 0:
             bombCooldown -= 1
@@ -408,9 +416,9 @@ while running:
                 all_sprites.add(shard)
                 shard_group.add(shard)
 
+        #check shards
         shardsLeft = len([s for s in shard_group if isinstance(s, Shard)])
-        print(shardsLeft)
-        print(shardsLoaded)
+
         #round system
         if round > maxRounds:
             pass
