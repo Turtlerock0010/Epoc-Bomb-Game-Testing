@@ -314,8 +314,8 @@ while running:
             mainloop = True
         
         #boxes
-        game.draw.rect(screen, (92, 92, 92), playButton, border_radius=10)
-        game.draw.rect(screen, (92, 92, 92), creditsButton, border_radius=10)
+        game.draw.rect(screen, (120, 120, 120), playButton, border_radius=10)
+        game.draw.rect(screen, (120, 120, 120), creditsButton, border_radius=10)
 
         #text
         writeText("Press B To Begin", "Arial",0,0,0,400,475)
