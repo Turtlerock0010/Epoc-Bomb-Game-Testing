@@ -41,6 +41,7 @@ maxRounds = 6
 roundStarted = False
 shardsLeft = -1
 shardsLoaded = False
+display = "title"
 
 #--class init--
 class Player(game.sprite.Sprite):
@@ -289,7 +290,6 @@ infoBox = game.Rect(560,400,230,190)
 
 #game loop
 running = True
-mainloop = False
 while running:
     for event in game.event.get():
         if event.type == game.QUIT:
@@ -308,10 +308,10 @@ while running:
                 volume = True
       
     #game code
-    if mainloop == False:
+    if display == "title":
         screen.fill("gray")
         if key[game.K_b]:
-            mainloop = True
+            display = "game"
         
         #boxes
         game.draw.rect(screen, (120, 120, 120), playButton, border_radius=10)
@@ -335,7 +335,7 @@ while running:
             writeText("Continuation of Epic Bomb", "Arial",255,255,255,400,350)
             writeText("Game On Scratch", "Arial",255,255,255,400,400)
 
-    if mainloop:
+    if display == "game":
         screen.fill("white")
         #--detail draw--
 
