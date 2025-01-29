@@ -277,8 +277,9 @@ wall_group.add(rightBorder)
 #detail init
 
 #start detail
-playButton = game.Rect(275,525,250,50)
-
+playButton = game.Rect(275,450,250,50)
+creditsButton = game.Rect(262.5,525,275,50)
+creditsBox = game.Rect(200,100,400,400)
 #game detail
 sidePanel = game.Rect(575,0,225,600)
 infoBox = game.Rect(560,400,230,190)
@@ -314,14 +315,25 @@ while running:
         
         #boxes
         game.draw.rect(screen, (92, 92, 92), playButton, 2, 10)
+        game.draw.rect(screen, (92, 92, 92), creditsButton, 2, 10)
 
         #text
-        writeText("Press B To Begin", "Arial",0,0,0,400,550)
-        writeText("Epoc Bomb Game Thing", "Arial",0,0,0,400,450)
+        writeText("Press B To Begin", "Arial",0,0,0,400,475)
+        writeText("Press C For Credits", "Arial",0,0,0,400,550)
+        writeText("Epoc Bomb Game Thing", "Arial",0,0,0,400,400)
 
         #image
         newimage = game.transform.scale(game.image.load('icon.png'), (300, 300))
-        screen.blit(newimage,(250,100))
+        screen.blit(newimage,(250,50))
+
+        if key[game.K_c]:
+            game.draw.rect(screen, (92, 92, 92), creditsBox)
+            writeText("Credits", "Arial",255,255,255,400,125)
+            writeText("Created by @Turtlerock0010", "Arial",255,255,255,400,175)
+            writeText("Inspired by Build A Boat", "Arial",255,255,255,400,225)
+            writeText("Epoc Bomb Game Thing, A", "Arial",255,255,255,400,275)
+            writeText("Continuation of Epic Bomb", "Arial",255,255,255,400,325)
+            writeText("Game On Scratch", "Arial",255,255,255,400,375)
 
     if mainloop:
         screen.fill("white")
