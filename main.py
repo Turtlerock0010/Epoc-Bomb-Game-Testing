@@ -36,6 +36,11 @@ bombY = []
 score = 0
 volume = True
 targetsLeft = 0
+round = 1
+maxRounds = 6
+roundStarted = False
+shardsLeft = -1
+shardsLoaded = False
 
 #--class init--
 class Player(game.sprite.Sprite):
@@ -332,7 +337,7 @@ while running:
         #info box text
         writeText("Score: " + str(score), "Arial",255,255,255,650,425)
         writeText("Targets: " + str(targetsLeft), "Arial",255,255,255,650,470)
-        writeText("Round: " + "[null]", "Arial",255,255,255,650,515)
+        writeText("Round: " + str(round), "Arial",255,255,255,650,515)
 
         #logo image
         newimage = game.transform.scale(game.image.load('icon.png'), (150, 150))
@@ -380,6 +385,8 @@ while running:
             for bomb in all_sprites.sprites():
                 if isinstance(bomb, Bomb):
                     all_sprites.remove(bomb)
+                    bombX.clear()
+                    bombY.clear()
             bombsLeft = -1
 
         if bombCooldown > 0:
@@ -401,9 +408,52 @@ while running:
                 all_sprites.add(shard)
                 shard_group.add(shard)
 
-        #checks for remaining shards
-        shardLeft = len([s for s in shard_group if isinstance(s, Shard)])
-        print(shardLeft)
+        shardsLeft = len([s for s in shard_group if isinstance(s, Shard)])
+        print(shardsLeft)
+        print(shardsLoaded)
+        #round system
+        if round > maxRounds:
+            pass
+        else:
+            if not roundStarted:
+                roundStarted = True
+                if round < 3:
+                    createTargets()
+                    bombsLeft = 1
+                elif round < 5:
+                    createTargets()
+                    createTargets()
+                    bombsLeft = 2
+                else:
+                    createTargets()
+                    createTargets()
+                    createTargets()
+                    bombsLeft = 3
+
+            if round < 3:
+                if shardsLeft == 8:
+                    shardsLoaded = True
+            elif round < 5:
+                if shardsLeft == 16:
+                    shardsLoaded = True
+            else:
+                if shardsLeft == 24:
+                    shardsLoaded = True
+    
+            if targetsLeft == 0:
+                if shardsLeft == 0:
+                    round += 1
+                    roundStarted = False
+                    shardsLoaded = False
+            
+            if shardsLoaded and shardsLeft == 0:
+                shardsLoaded = False
+                for target in all_sprites.sprites():
+                    if isinstance(target, Target):
+                        all_sprites.remove(target)
+                        targetsLeft = 0
+                roundStarted = False
+                shardsLoaded = False
 
     time.sleep(0.08333)
     game.display.update()
