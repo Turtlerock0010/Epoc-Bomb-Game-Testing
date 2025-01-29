@@ -314,8 +314,8 @@ while running:
             mainloop = True
         
         #boxes
-        game.draw.rect(screen, (92, 92, 92), playButton, 2, 10)
-        game.draw.rect(screen, (92, 92, 92), creditsButton, 2, 10)
+        game.draw.rect(screen, (92, 92, 92), playButton, border_radius=10)
+        game.draw.rect(screen, (92, 92, 92), creditsButton, border_radius=10)
 
         #text
         writeText("Press B To Begin", "Arial",0,0,0,400,475)
@@ -327,13 +327,13 @@ while running:
         screen.blit(newimage,(250,50))
 
         if key[game.K_c]:
-            game.draw.rect(screen, (92, 92, 92), creditsBox)
+            game.draw.rect(screen, (92, 92, 92), creditsBox, border_radius=50)
             writeText("Credits", "Arial",255,255,255,400,125)
             writeText("Created by @Turtlerock0010", "Arial",255,255,255,400,175)
             writeText("Inspired by Build A Boat", "Arial",255,255,255,400,225)
-            writeText("Epoc Bomb Game Thing, A", "Arial",255,255,255,400,275)
-            writeText("Continuation of Epic Bomb", "Arial",255,255,255,400,325)
-            writeText("Game On Scratch", "Arial",255,255,255,400,375)
+            writeText("Epoc Bomb Game Thing, A", "Arial",255,255,255,400,300)
+            writeText("Continuation of Epic Bomb", "Arial",255,255,255,400,350)
+            writeText("Game On Scratch", "Arial",255,255,255,400,400)
 
     if mainloop:
         screen.fill("white")
@@ -351,7 +351,7 @@ while running:
 
         #boxes
         game.draw.rect(screen, (92, 92, 92), sidePanel)
-        game.draw.rect(screen, (70, 70, 70), infoBox)
+        game.draw.rect(screen, (70, 70, 70), infoBox, border_radius=10)
         
         #info box text
         writeText("Score: " + str(score), "Arial",255,255,255,650,425)
@@ -361,11 +361,11 @@ while running:
 
         #logo image
         newimage = game.transform.scale(game.image.load('icon.png'), (150, 150))
-        screen.blit(newimage,(600,50))
+        screen.blit(newimage,(600,25))
 
         #logo text
-        writeText("Epoc Bomb", "Arial",200,200,200,675,250)
-        writeText("Game Thing", "Arial",200,200,200,675,300)
+        writeText("Epoc Bomb", "Arial",200,200,200,675,200)
+        writeText("Game Thing", "Arial",200,200,200,675,235)
 
         #--End of Detail Draw--
 
