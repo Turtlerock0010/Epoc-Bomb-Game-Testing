@@ -1,0 +1,25 @@
+screen.fill("gray")
+        if key[game.K_b]:
+            display = "game"
+        
+        #boxes
+        game.draw.rect(screen, (120, 120, 120), playButton, border_radius=10)
+        game.draw.rect(screen, (120, 120, 120), creditsButton, border_radius=10)
+
+        #text
+        writeText("Press B To Begin", "Arial",0,0,0,400,475)
+        writeText("Press C For Credits", "Arial",0,0,0,400,550)
+        writeText("Epoc Bomb Game Thing", "Arial",0,0,0,400,400)
+
+        #image
+        newimage = game.transform.scale(game.image.load('icon.png'), (300, 300))
+        screen.blit(newimage,(250,50))
+
+        if key[game.K_c]:
+            game.draw.rect(screen, (92, 92, 92), creditsBox, border_radius=50)
+            writeText("Credits", "Arial",255,255,255,400,125)
+            writeText("Created by @Turtlerock0010", "Arial",255,255,255,400,175)
+            writeText("Inspired by Build A Boat", "Arial",255,255,255,400,225)
+            writeText("Epoc Bomb Game Thing, A", "Arial",255,255,255,400,300)
+            writeText("Continuation of Epic Bomb", "Arial",255,255,255,400,350)
+            writeText("Game On Scratch", "Arial",255,255,255,400,400)

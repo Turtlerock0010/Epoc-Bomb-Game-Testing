@@ -7,6 +7,7 @@ import pygame as game
 import time
 import random
 from pygame import mixer
+from pygame import gfxdraw
 
 game.init()
 
@@ -15,7 +16,7 @@ screen = game.display.set_mode((800,600))
 game.display.set_caption("Epoc Bomb Game Thing")
 
 #icon init
-icon_image = game.image.load("icon.png")
+icon_image = game.image.load("images/icon.png")
 game.display.set_icon(icon_image)
 
 
@@ -23,9 +24,10 @@ game.display.set_icon(icon_image)
 
 #music init
 game.mixer.init()
-sound = game.mixer.Sound("sounds/theme.mp3")
+playTheme = game.mixer.Sound("sounds/theme.mp3")
+playTitleTheme = game.mixer.Sound("sounds/titletheme.mp3")
 hit = game.mixer.Sound("sounds/hit.wav")
-sound.play(-1)
+playTitleTheme.play(-1)
 
 #var init
 bombCooldown = 0
@@ -42,6 +44,8 @@ roundStarted = False
 shardsLeft = -1
 shardsLoaded = False
 display = "title"
+titlethemeon = True
+buttonIndex = 1
 
 #--class init--
 class Player(game.sprite.Sprite):
@@ -157,7 +161,7 @@ class Wall(game.sprite.Sprite):
     def __init__(self, x, y, width, height):
         super().__init__()
         self.image = game.Surface([width, height])
-        self.image.fill((92, 92, 92))  # Gray color (RGB)
+        self.image.fill((56, 140, 70))  # Gray color RGB ( 92, 92, 92)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -245,8 +249,8 @@ def createTargets():
             targets.move(0, -25)
             targets.move(-25, 0)
 
-def writeText(input, textfont, R, G, B, X, Y):
-    font = game.font.SysFont(textfont, 30)
+def writeText(input, textfont, fontsize, R, G, B, X, Y):
+    font = game.font.SysFont(textfont, fontsize)
     textwrite = font.render(input, True, (R, G, B))
     textRectwrite = textwrite.get_rect()
     textRectwrite.center = (X, Y)
@@ -278,9 +282,22 @@ wall_group.add(rightBorder)
 #detail init
 
 #start detail
-playButton = game.Rect(275,450,250,50)
-creditsButton = game.Rect(262.5,525,275,50)
-creditsBox = game.Rect(200,100,400,400)
+playButton = game.Rect(25,500,225,75)
+playButtonShadow = game.Rect(28,503,228,78)
+creditsButton = game.Rect(275,500,225,75)
+creditsButtonShadow = game.Rect(278,503,228,78)
+tutorialButton = game.Rect(525,500,225,75)
+tutorialButtonShadow = game.Rect(528,503,228,78)
+creditsBox = game.Rect(100,100,600,600)
+creditsBoxShadow = game.Rect(95,95,610,610)
+coverbox1 = game.Rect(0,0,200,600)
+coverbox2 = game.Rect(200,400,600,200)
+
+barW = 230
+barH = 10
+BarX = 25
+BarY = 585
+
 #game detail
 sidePanel = game.Rect(575,0,225,600)
 infoBox = game.Rect(560,400,230,190)
@@ -299,41 +316,89 @@ while running:
     key = game.key.get_pressed()
     if key[game.K_m]:
             if volume:
-                sound.set_volume(0) 
+                playTitleTheme.set_volume(0) 
                 hit.set_volume(0)
                 volume = False
             else:
-                sound.set_volume(1) 
+                if display == "title":
+                    playTitleTheme.set_volume(1) 
+                if display == "game":
+                    playTitleTheme.set_volume(.25) 
                 hit.set_volume(1)
                 volume = True
       
     #game code
     if display == "title":
-        screen.fill("gray")
-        if key[game.K_b]:
-            display = "game"
-        
-        #boxes
-        game.draw.rect(screen, (120, 120, 120), playButton, border_radius=10)
-        game.draw.rect(screen, (120, 120, 120), creditsButton, border_radius=10)
-
-        #text
-        writeText("Press B To Begin", "Arial",0,0,0,400,475)
-        writeText("Press C For Credits", "Arial",0,0,0,400,550)
-        writeText("Epoc Bomb Game Thing", "Arial",0,0,0,400,400)
 
         #image
-        newimage = game.transform.scale(game.image.load('icon.png'), (300, 300))
-        screen.blit(newimage,(250,50))
+        newimage = game.transform.scale(game.image.load('images/gameplay.png'), (600, 600))
+        screen.blit(newimage,(200,0))
 
-        if key[game.K_c]:
-            game.draw.rect(screen, (92, 92, 92), creditsBox, border_radius=50)
-            writeText("Credits", "Arial",255,255,255,400,125)
-            writeText("Created by @Turtlerock0010", "Arial",255,255,255,400,175)
-            writeText("Inspired by Build A Boat", "Arial",255,255,255,400,225)
-            writeText("Epoc Bomb Game Thing, A", "Arial",255,255,255,400,300)
-            writeText("Continuation of Epic Bomb", "Arial",255,255,255,400,350)
-            writeText("Game On Scratch", "Arial",255,255,255,400,400)
+        game.draw.rect(screen, (56, 140, 70), coverbox1)
+        game.draw.rect(screen, (56, 140, 70), coverbox2)
+        game.draw.polygon(screen, (0, 0, 0), [(204, 0), (202, 398), (802, 398)])
+        game.draw.polygon(screen, (56, 140, 70), [(200, 0), (200, 400), (800, 400)])
+        
+        writeText("Epoc Bomb", "impact", 75,0,0,0,190,155)
+        writeText("Epoc Bomb", "impact", 75,255,255,255,185,150)
+        writeText("Game Thing", "impact", 100,0,0,0,260,265)
+        writeText("Game Thing", "impact", 100,255,255,255,255,260)
+
+        #boxes
+        game.draw.rect(screen, (76, 160, 90), playButtonShadow, border_radius=10)
+        game.draw.rect(screen, (96, 180, 110), playButton, border_radius=10)
+        game.draw.rect(screen, (76, 160, 90), creditsButtonShadow, border_radius=10)
+        game.draw.rect(screen, (96, 180, 110), creditsButton, border_radius=10)
+        game.draw.rect(screen, (76, 160, 90), tutorialButtonShadow, border_radius=10)
+        game.draw.rect(screen, (96, 180, 110), tutorialButton, border_radius=10)
+
+        writeText("Play: B", "impact", 50,0,0,0,140,540)
+        writeText("Play: B", "impact", 50,255,255,255,137,537)
+        writeText("Credits: C", "impact", 50,0,0,0,390,540)
+        writeText("Credits: C", "impact", 50,255,255,255,387,537)
+        writeText("Tutorial: T", "impact", 50,0,0,0,640,540)
+        writeText("Tutorial: T", "impact", 50,255,255,255,637,537)
+
+        if key[game.K_a]:
+            if buttonIndex > 1:
+                buttonIndex -= 1
+            else:
+                buttonIndex = 3
+        if key[game.K_d]:
+            if buttonIndex < 3:
+                buttonIndex += 1
+            else:
+                buttonIndex = 1
+
+        if buttonIndex == 1:
+            BarX = 25
+        elif buttonIndex == 2:
+            BarX = 275
+        elif buttonIndex == 3:
+            BarX = 525
+        game.draw.rect(screen, (255, 255, 255), (BarX, BarY, barW, barH), border_radius=10)
+
+        if key[game.K_c] or (key[game.K_RETURN] and buttonIndex == 2):
+            playTitleTheme.set_volume(.25)
+            rect_surface = game.Surface((800, 600), game.SRCALPHA)
+            rect_surface.fill((0, 0, 0, 128))
+            screen.blit(rect_surface, (0, 0))
+            game.draw.rect(screen, (76, 160, 90), creditsBoxShadow, border_radius=50)
+            game.draw.rect(screen, (96, 180, 110), creditsBox, border_radius=50)
+            writeText("Credits", "impact", 50,0,0,0,405,155)
+            writeText("Credits", "impact", 50,255,255,255,400,150)
+            writeText("Created by @Turtlerock0010", "Arial",30,255,255,255,400,175+50)
+            writeText("Inspired by Build A Boat", "Arial",30,255,255,255,400,225+50)
+            writeText("Epoc Bomb Game Thing, A", "Arial",30,255,255,255,400,300+50)
+            writeText("Continuation of Epic Bomb", "Arial",30,255,255,255,400,350+50)
+            writeText("Game On Scratch", "Arial",30,255,255,255,400,400+50)
+        if not (key[game.K_c] or (key[game.K_RETURN] and buttonIndex == 2)):
+            playTitleTheme.set_volume(1)
+        
+        if key[game.K_b] or (key[game.K_RETURN] and buttonIndex == 1):
+            display = "game"
+            playTitleTheme.set_volume(.25)
+
 
     if display == "game":
         screen.fill("white")
@@ -350,22 +415,25 @@ while running:
         all_sprites.draw(screen)
 
         #boxes
-        game.draw.rect(screen, (92, 92, 92), sidePanel)
-        game.draw.rect(screen, (70, 70, 70), infoBox, border_radius=10)
+        game.draw.rect(screen, (56, 140, 70), sidePanel)
+        game.draw.rect(screen, (96, 180, 110), infoBox, border_radius=10)
+
         
         #info box text
-        writeText("Score: " + str(score), "Arial",255,255,255,650,425)
-        writeText("Targets: " + str(targetsLeft), "Arial",255,255,255,650,470)
-        writeText("Round: " + str(round), "Arial",255,255,255,650,515)
-        writeText("Bombs: " + str(bombsLeft), "Arial",255,255,255,650,560)
+        writeText("Score: " + str(score), "Arial", 30,255,255,255,650,425)
+        writeText("Targets: " + str(targetsLeft), "Arial", 30,255,255,255,650,470)
+        writeText("Round: " + str(round), "Arial", 30,255,255,255,650,515)
+        writeText("Bombs: " + str(bombsLeft), "Arial", 30,255,255,255,650,560)
 
         #logo image
-        newimage = game.transform.scale(game.image.load('icon.png'), (150, 150))
+        newimage = game.transform.scale(game.image.load('images/icon.png'), (150, 150))
         screen.blit(newimage,(600,25))
 
         #logo text
-        writeText("Epoc Bomb", "Arial",200,200,200,675,200)
-        writeText("Game Thing", "Arial",200,200,200,675,235)
+        writeText("Epoc Bomb", "impact", 40,0,0,0,678,203)
+        writeText("Epoc Bomb", "impact", 40,255,255,255,675,200)
+        writeText("Game Thing", "impact", 40,0,0,0,678,248)
+        writeText("Game Thing", "impact", 40,255,255,255,675,245)
 
         #--End of Detail Draw--
 
