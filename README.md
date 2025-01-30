@@ -48,3 +48,7 @@ Version 0.016
 - New fonts used
 - new text used
 - improved icon
+
+Version 0.017
+- new secret in the title menu
+- minor changes to the title menu
