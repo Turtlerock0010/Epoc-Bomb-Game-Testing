@@ -113,7 +113,8 @@ class Target(game.sprite.Sprite):
             self.kill()
             global score
             global targetsLeft
-            score += 100
+            if display == "game":
+                score += 100
             targetsLeft -= 1
             global hit
             hit.play()
