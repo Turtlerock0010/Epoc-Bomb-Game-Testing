@@ -39,7 +39,7 @@ score = 0
 volume = True
 targetsLeft = 0
 round = 1
-maxRounds = 6
+maxRounds = 9
 roundStarted = False
 shardsLeft = -1
 shardsLoaded = False
@@ -65,6 +65,11 @@ class Player(game.sprite.Sprite):
         # Update the sprite's position and store it
         self.rect.x += dx
         self.rect.y += dy
+    
+    def goto(self, sx, sy):
+        # Update the sprite's position and store it
+        self.rect.x = sx
+        self.rect.y = sy
 
 class Bomb(game.sprite.Sprite):
     def __init__(self, x, y, width, height):
@@ -154,8 +159,12 @@ class Shard(game.sprite.Sprite):
             self.rect.x += self.speed
             self.rect.y += self.speed
         # Add checks for walls or other objects to stop the shard movement
-        if game.sprite.spritecollideany(self, wall_group):
-            self.kill()
+        if display == "game":
+            if game.sprite.spritecollideany(self, wall_group):
+                self.kill()
+        if display == "title":
+            if game.sprite.spritecollideany(self, wall_group_title):
+                self.kill()
 
 class Wall(game.sprite.Sprite):
     def __init__(self, x, y, width, height):
@@ -174,6 +183,81 @@ class Wall(game.sprite.Sprite):
 #--end of class init--
 
 #--function init--
+def createTargetsTitle():
+    randomSquare = [random.randint(5,21)*25,random.randint(0,16)*25]
+
+    #top target
+    targets = Target(randomSquare[0], randomSquare[1], 25, 25)
+    title_sprites.add(targets)
+    for i in range(random.randint(1,20)):
+        targets.move(0,-25)
+        if game.sprite.collide_rect(targets, topBorderTitle):
+            targets.move(0,25)
+    
+    #bottom target
+    targets = Target(randomSquare[0], randomSquare[1], 25, 25)
+    title_sprites.add(targets)
+    for i in range(random.randint(1,20)):
+        targets.move(0,25)
+        if game.sprite.collide_rect(targets, bottomBorderTitle):
+            targets.move(0,-25)
+    
+    #left target
+    targets = Target(randomSquare[0], randomSquare[1], 25, 25)
+    title_sprites.add(targets)
+    for i in range(random.randint(1,20)):
+        targets.move(-25, 0)
+        if game.sprite.collide_rect(targets, leftBorderTitle):
+            targets.move(25, 0)
+    
+    #right target
+    targets = Target(randomSquare[0], randomSquare[1], 25, 25)
+    title_sprites.add(targets)
+    for i in range(random.randint(1,20)):
+        targets.move(25, 0)
+        if game.sprite.collide_rect(targets, rightBorderTitle):
+            targets.move(-25, 0)
+    
+    #top-left target
+    targets = Target(randomSquare[0], randomSquare[1], 25, 25)
+    title_sprites.add(targets)
+    for i in range(random.randint(1,20)):
+        targets.move(0, -25)
+        targets.move(-25, 0)
+        if game.sprite.collide_rect(targets, topBorderTitle) or game.sprite.collide_rect(targets, leftBorderTitle):
+            targets.move(0, 25)
+            targets.move(25, 0)
+    
+    #top-right target
+    targets = Target(randomSquare[0], randomSquare[1], 25, 25)
+    title_sprites.add(targets)
+    for i in range(random.randint(1,20)):
+        targets.move(0, -25)
+        targets.move(25, 0)
+        if game.sprite.collide_rect(targets, topBorderTitle) or game.sprite.collide_rect(targets, rightBorderTitle):
+            targets.move(0, 25)
+            targets.move(-25, 0)
+    
+    #bottom-left target
+    targets = Target(randomSquare[0], randomSquare[1], 25, 25)
+    title_sprites.add(targets)
+    for i in range(random.randint(1,20)):
+        targets.move(0, 25)
+        targets.move(-25, 0)
+        if game.sprite.collide_rect(targets, bottomBorderTitle) or game.sprite.collide_rect(targets, leftBorderTitle):
+            targets.move(0, -25)
+            targets.move(25, 0)
+    
+    #bottom-right target
+    targets = Target(randomSquare[0], randomSquare[1], 25, 25)
+    title_sprites.add(targets)
+    for i in range(random.randint(1,20)):
+        targets.move(0, 25)
+        targets.move(25, 0)
+        if game.sprite.collide_rect(targets, bottomBorderTitle) or game.sprite.collide_rect(targets, rightBorderTitle):
+            targets.move(0, -25)
+            targets.move(-25, 0)
+
 def createTargets():
     randomSquare = [random.randint(1,21)*25,random.randint(1,21)*25]
 
@@ -259,11 +343,14 @@ def writeText(input, textfont, fontsize, R, G, B, X, Y):
 
 #--sprite init--
 all_sprites = game.sprite.Group()
+title_sprites = game.sprite.Group()
 wall_group = game.sprite.Group()
+wall_group_title = game.sprite.Group()
 shard_group = game.sprite.Group()
 #Dynamic Sprites
 player = Player(275, 275, 25, 25)
 all_sprites.add(player)
+title_sprites.add(player)
 
 #Static Sprites
 topBorder = Wall(0,0,600,25)
@@ -278,6 +365,19 @@ wall_group.add(leftBorder)
 rightBorder = Wall(550,0,25,600)
 all_sprites.add(rightBorder)
 wall_group.add(rightBorder)
+
+topBorderTitle = Wall(200,-25,600,25)
+title_sprites.add(topBorderTitle)
+wall_group_title.add(topBorderTitle)
+bottomBorderTitle = Wall(200,400,600,25)
+title_sprites.add(bottomBorderTitle)
+wall_group_title.add(bottomBorderTitle)
+leftBorderTitle = Wall(175,0,25,400)
+title_sprites.add(leftBorderTitle)
+wall_group_title.add(leftBorderTitle)
+rightBorderTitle = Wall(800,0,25,400)
+title_sprites.add(rightBorderTitle)
+wall_group_title.add(rightBorderTitle)
 
 #detail init
 
@@ -305,7 +405,11 @@ infoBox = game.Rect(560,400,230,190)
 
 #---end of game init---
 
+for i in range(10):
+    createTargetsTitle()
+
 #game loop
+player.goto(400,100)
 running = True
 while running:
     for event in game.event.get():
@@ -329,15 +433,58 @@ while running:
       
     #game code
     if display == "title":
+        screen.fill("white")
+
+        key = game.key.get_pressed()
+        if key[game.K_a] or key[game.K_LEFT]:
+            player.move(-25,0)
+            if game.sprite.collide_rect(player, leftBorderTitle):
+                player.move(25,0)
+        if key[game.K_d] or key[game.K_RIGHT]:
+            player.move(25,0)
+            if game.sprite.collide_rect(player, rightBorderTitle):
+                player.move(-25,0)
+        if key[game.K_s] or key[game.K_DOWN]:
+            player.move(0,25)
+            if game.sprite.collide_rect(player, bottomBorderTitle):
+                player.move(0,-25)
+        if key[game.K_w] or key[game.K_UP]:
+            player.move(0,-25)
+            if game.sprite.collide_rect(player, topBorderTitle):
+                player.move(0,25)
+        title_sprites.update()
+        title_sprites.draw(screen)
+
+        if key[game.K_k]:
+            createTargetsTitle()
+        if key[game.K_l]:
+            for target in all_sprites.sprites():
+                if isinstance(target, Target):
+                    title_sprites.remove(target)
+                    targetsLeft = 0
+        
+
+        if key[game.K_u]:
+            directions = ["up", "down", "left", "right", "up_left", "up_right", "down_left", "down_right"]
+            for direction in directions:
+                shard = Shard(player.rect.x, player.rect.y, 25, 25, direction)
+                title_sprites.add(shard)
+                shard_group.add(shard)
 
         #image
-        newimage = game.transform.scale(game.image.load('images/gameplay.png'), (600, 600))
-        screen.blit(newimage,(200,0))
+        #newimage = game.transform.scale(game.image.load('images/gameplay.png'), (600, 600))
+        #screen.blit(newimage,(200,0))
+
+        for i in range(-1,32):
+            game.draw.line(screen, (0, 0, 0), (i * 25,0),(i * 25,550))
+        for i in range(-1,21):
+            game.draw.line(screen, (0, 0, 0), (25,i * 25),(800,i * 25))
 
         game.draw.rect(screen, (56, 140, 70), coverbox1)
         game.draw.rect(screen, (56, 140, 70), coverbox2)
         game.draw.polygon(screen, (0, 0, 0), [(204, 0), (202, 398), (802, 398)])
         game.draw.polygon(screen, (56, 140, 70), [(200, 0), (200, 400), (800, 400)])
+        game.draw.polygon(screen, (96, 180, 110), [(10, 105), (10, 325), (650, 325), (330, 105)])
         
         writeText("Epoc Bomb", "impact", 75,0,0,0,190,155)
         writeText("Epoc Bomb", "impact", 75,255,255,255,185,150)
@@ -359,12 +506,12 @@ while running:
         writeText("Tutorial: T", "impact", 50,0,0,0,640,540)
         writeText("Tutorial: T", "impact", 50,255,255,255,637,537)
 
-        if key[game.K_a]:
+        if key[game.K_q]:
             if buttonIndex > 1:
                 buttonIndex -= 1
             else:
                 buttonIndex = 3
-        if key[game.K_d]:
+        if key[game.K_e]:
             if buttonIndex < 3:
                 buttonIndex += 1
             else:
@@ -392,12 +539,22 @@ while running:
             writeText("Epoc Bomb Game Thing, A", "Arial",30,255,255,255,400,300+50)
             writeText("Continuation of Epic Bomb", "Arial",30,255,255,255,400,350+50)
             writeText("Game On Scratch", "Arial",30,255,255,255,400,400+50)
+            writeText("Hint: Did you know you can", "Arial",30,255,255,255,400,450+50)
+            writeText("mess around in the title?", "Arial",30,255,255,255,400,475+50)
+            writeText("Use WASD, U and K", "Arial",30,255,255,255,400,500+50)
         if not (key[game.K_c] or (key[game.K_RETURN] and buttonIndex == 2)):
             playTitleTheme.set_volume(1)
         
         if key[game.K_b] or (key[game.K_RETURN] and buttonIndex == 1):
             display = "game"
             playTitleTheme.set_volume(.25)
+            player.goto(275,275)
+            targetsLeft = 0
+            for target in title_sprites.sprites():
+                if isinstance(target, Target):
+                    title_sprites.remove(target)
+                    targetsLeft = 0
+            shard_group.empty()
 
 
     if display == "game":
@@ -505,10 +662,10 @@ while running:
         else:
             if not roundStarted:
                 roundStarted = True
-                if round < 3:
+                if round < 4:
                     createTargets()
                     bombsLeft = 1
-                elif round < 5:
+                elif round < 7:
                     createTargets()
                     createTargets()
                     bombsLeft = 2
@@ -518,10 +675,10 @@ while running:
                     createTargets()
                     bombsLeft = 3
 
-            if round < 3:
+            if round < 4:
                 if shardsLeft == 8:
                     shardsLoaded = True
-            elif round < 5:
+            elif round < 7:
                 if shardsLeft == 16:
                     shardsLoaded = True
             else:
