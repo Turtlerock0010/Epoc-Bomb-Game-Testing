@@ -31,3 +31,20 @@ This is going to be a rapid fire information page so here it is:
 - This game is inspired by a mini game in Build A Boat for Treasure in Roblox
 - This game is the continuation of Epoc Bomb Game Thing on Scratch
 - This game is currently in active development
+
+## Important Updates
+This section is dedicated to listing major versions that have fundemental aspects of the game completely changed or added.
+
+Version 0.010
+- Adds a round system
+- Adds a title screen
+- its version 10
+
+Version 0.016
+- Complete overhaul of the title screen
+- Complete overhaul of credits tab
+- Added a nonfunctional tutorial button
+- Overhaul of game design
+- New fonts used
+- new text used
+- improved icon
