@@ -6,6 +6,7 @@
 import pygame as game
 import time
 import random
+import math
 from pygame import mixer
 from pygame import gfxdraw
 
@@ -27,6 +28,7 @@ game.mixer.init()
 playTheme = game.mixer.Sound("sounds/theme.mp3")
 playTitleTheme = game.mixer.Sound("sounds/titletheme.mp3")
 hit = game.mixer.Sound("sounds/hit.wav")
+explosion = game.mixer.Sound("sounds/Explosion.mp3")
 playTitleTheme.play(-1)
 
 #var init
@@ -160,7 +162,7 @@ class Shard(game.sprite.Sprite):
             self.rect.x += self.speed
             self.rect.y += self.speed
         # Add checks for walls or other objects to stop the shard movement
-        if display == "game":
+        if display == "game" or display == "tutorial":
             if game.sprite.spritecollideany(self, wall_group):
                 self.kill()
         if display == "title":
@@ -423,13 +425,15 @@ while running:
             if volume:
                 playTitleTheme.set_volume(0) 
                 hit.set_volume(0)
+                explosion.set_volume(0)
                 volume = False
             else:
                 if display == "title":
                     playTitleTheme.set_volume(1) 
-                if display == "game":
+                if display == "game" or display == "tutorial":
                     playTitleTheme.set_volume(.25) 
                 hit.set_volume(1)
+                explosion.set_volume(1)
                 volume = True
       
     #game code
@@ -466,6 +470,7 @@ while running:
         
 
         if key[game.K_u]:
+            explosion.play()
             directions = ["up", "down", "left", "right", "up_left", "up_right", "down_left", "down_right"]
             for direction in directions:
                 shard = Shard(player.rect.x, player.rect.y, 25, 25, direction)
@@ -546,6 +551,17 @@ while running:
         if not (key[game.K_c] or (key[game.K_RETURN] and buttonIndex == 2)):
             playTitleTheme.set_volume(1)
         
+        if key[game.K_t] or (key[game.K_RETURN] and buttonIndex == 3):
+                    display = "tutorial"
+                    playTitleTheme.set_volume(.25)
+                    player.goto(275,275)
+                    targetsLeft = 0
+                    for target in title_sprites.sprites():
+                        if isinstance(target, Target):
+                            title_sprites.remove(target)
+                            targetsLeft = 0
+                    shard_group.empty()
+
         if key[game.K_b] or (key[game.K_RETURN] and buttonIndex == 1):
             display = "game"
             playTitleTheme.set_volume(.25)
@@ -556,6 +572,118 @@ while running:
                     title_sprites.remove(target)
                     targetsLeft = 0
             shard_group.empty()
+    
+    if display == "tutorial":
+        screen.fill("white")
+        #--detail draw--
+
+        #grid lines
+        for i in range(21):
+            game.draw.line(screen, (0, 0, 0), (i * 25+25,25),(i * 25+25,550))
+        for i in range(21):
+            game.draw.line(screen, (0, 0, 0), (25,i * 25+25),(550,i * 25+25))
+
+        #functional components
+        all_sprites.update()
+        all_sprites.draw(screen)
+
+        #boxes
+        game.draw.rect(screen, (56, 140, 70), sidePanel)
+
+
+
+        #--End of Detail Draw--
+
+        #player actions
+        key = game.key.get_pressed()
+        if key[game.K_a] or key[game.K_LEFT]:
+            player.move(-25,0)
+            if game.sprite.collide_rect(player, leftBorder):
+                player.move(25,0)
+        if key[game.K_d] or key[game.K_RIGHT]:
+            player.move(25,0)
+            if game.sprite.collide_rect(player, rightBorder):
+                player.move(-25,0)
+        if key[game.K_s] or key[game.K_DOWN]:
+            player.move(0,25)
+            if game.sprite.collide_rect(player, bottomBorder):
+                player.move(0,-25)
+        if key[game.K_w] or key[game.K_UP]:
+            player.move(0,-25)
+            if game.sprite.collide_rect(player, topBorder):
+                player.move(0,25)
+        
+        if key[game.K_SPACE] and bombCooldown == 0 and bombsLeft > 0:
+            bombX.append(player.rect.x)
+            bombY.append(player.rect.y)
+            bomb = Bomb(player.rect.x, player.rect.y, 25, 25)
+            all_sprites.add(bomb)
+            bombCooldown = 3
+            bombsLeft -= 1
+        elif bombsLeft == 0:
+            for i in range(len(bombX)):
+                directions = ["up", "down", "left", "right", "up_left", "up_right", "down_left", "down_right"]
+                for direction in directions:
+                    shard = Shard(bombX[i], bombY[i], 25, 25, direction)
+                    all_sprites.add(shard)
+                    shard_group.add(shard)
+            for bomb in all_sprites.sprites():
+                if isinstance(bomb, Bomb):
+                    all_sprites.remove(bomb)
+                    bombX.clear()
+                    bombY.clear()
+                    explosion.play()
+            #possibly important code: bombsLeft = -1
+
+        if bombCooldown > 0:
+            bombCooldown -= 1
+
+        #check shards
+        shardsLeft = len([s for s in shard_group if isinstance(s, Shard)])
+
+        #round system
+        if round > maxRounds:
+            pass
+        else:
+            if not roundStarted:
+                roundStarted = True
+                if round < 4:
+                    createTargets()
+                    bombsLeft = 1
+                elif round < 7:
+                    createTargets()
+                    createTargets()
+                    bombsLeft = 2
+                else:
+                    createTargets()
+                    createTargets()
+                    createTargets()
+                    bombsLeft = 3
+
+            if round < 4:
+                if shardsLeft == 8:
+                    shardsLoaded = True
+            elif round < 7:
+                if shardsLeft == 16:
+                    shardsLoaded = True
+            else:
+                if shardsLeft == 24:
+                    shardsLoaded = True
+    
+            if targetsLeft == 0:
+                if shardsLeft == 0:
+                    round += 1
+                    roundStarted = False
+                    shardsLoaded = False
+            
+            if shardsLoaded and shardsLeft == 0:
+                shardsLoaded = False
+                for target in all_sprites.sprites():
+                    if isinstance(target, Target):
+                        all_sprites.remove(target)
+                        targetsLeft = 0
+                roundStarted = False
+                shardsLoaded = False
 
 
     if display == "game":
@@ -576,12 +704,12 @@ while running:
         game.draw.rect(screen, (56, 140, 70), sidePanel)
         game.draw.rect(screen, (96, 180, 110), infoBox, border_radius=10)
 
-        
+
         #info box text
-        writeText("Score: " + str(score), "Arial", 30,255,255,255,650,425)
-        writeText("Targets: " + str(targetsLeft), "Arial", 30,255,255,255,650,470)
-        writeText("Round: " + str(round), "Arial", 30,255,255,255,650,515)
-        writeText("Bombs: " + str(bombsLeft), "Arial", 30,255,255,255,650,560)
+        writeText("Score: " + str(score), "Arial", 25,255,255,255,650,425)
+        writeText("Targets: " + str(targetsLeft), "Arial", 25,255,255,255,650,470)
+        writeText("Round: " + str(round), "Arial", 25,255,255,255,650,515)
+        writeText("Bombs: " + str(bombsLeft), "Arial", 25,255,255,255,650,560)
 
         #logo image
         newimage = game.transform.scale(game.image.load('images/icon.png'), (150, 150))
@@ -633,6 +761,7 @@ while running:
                     all_sprites.remove(bomb)
                     bombX.clear()
                     bombY.clear()
+                    explosion.play()
             #possibly important code: bombsLeft = -1
 
         if bombCooldown > 0:
@@ -648,6 +777,7 @@ while running:
                     targetsLeft = 0
 
         if key[game.K_u]:
+            explosion.play()
             directions = ["up", "down", "left", "right", "up_left", "up_right", "down_left", "down_right"]
             for direction in directions:
                 shard = Shard(player.rect.x, player.rect.y, 25, 25, direction)
