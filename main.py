@@ -48,6 +48,10 @@ shardsLoaded = False
 display = "title"
 titlethemeon = True
 buttonIndex = 1
+tutorialStage = 0
+tutorialOnce = True
+tutorial3pass = False
+tutorialLoad = False
 
 #--class init--
 class Player(game.sprite.Sprite):
@@ -404,6 +408,10 @@ BarY = 585
 #game detail
 sidePanel = game.Rect(575,0,225,600)
 infoBox = game.Rect(560,400,230,190)
+
+#tutorial detail
+tutorialBox = game.Rect(560,15,230,575)
+guideSquare = game.Rect(25,25,25,25)
 #--end of sprite init--
 
 #---end of game init---
@@ -589,6 +597,8 @@ while running:
 
         #boxes
         game.draw.rect(screen, (56, 140, 70), sidePanel)
+        game.draw.rect(screen, (96, 180, 110), tutorialBox, border_radius=10)
+        game.draw.rect(screen, (239, 245, 66), guideSquare)
 
 
 
@@ -641,49 +651,235 @@ while running:
         #check shards
         shardsLeft = len([s for s in shard_group if isinstance(s, Shard)])
 
-        #round system
-        if round > maxRounds:
-            pass
-        else:
-            if not roundStarted:
-                roundStarted = True
-                if round < 4:
-                    createTargets()
-                    bombsLeft = 1
-                elif round < 7:
-                    createTargets()
-                    createTargets()
-                    bombsLeft = 2
-                else:
-                    createTargets()
-                    createTargets()
-                    createTargets()
-                    bombsLeft = 3
+        if tutorialOnce:
+            tutorialOnce = False
+            guideSquare.left = random.randint(1,21) * 25
+            guideSquare.top = random.randint(1,21) * 25
+            shard_group.empty()
+            if tutorialStage == 1:
+                bombsLeft = 1
+            if tutorialStage == 2:
+                bombsLeft = 5
+            if tutorialStage == 3:
+                tutorialLoad = True
+            if tutorialStage == 4:
+                bombsLeft = 2
+                createTargets()
+                createTargets()
+        
+        if tutorialLoad:
+            if tutorialStage == 3:
+                bombsLeft = 1
+                createTargets()
+            if tutorialStage == 4:
+                bombsLeft = 2
+                createTargets()
+                createTargets()
+            tutorialLoad = False
 
-            if round < 4:
+        #tutorial system
+        if tutorialStage <= 5:
+            if tutorialStage == 0:
+                writeText("Welcome To Epoc Bomb", "Arial", 20,255,255,255,675,30)
+                writeText("Game Thing!", "Arial", 20,255,255,255,675,60)
+                writeText("This is the tutorial for this", "Arial", 20,255,255,255,675,90)
+                writeText("project. Start by going to", "Arial", 20,255,255,255,675,120) 
+                writeText("the yellow guide square.", "Arial", 20,255,255,255,675,150)
+
+            if tutorialStage == 1:
+                writeText("First of all, lets talk about", "Arial", 20,255,255,255,675,30)
+                writeText("Bombs and Shards.", "Arial", 20,255,255,255,675,60)
+                writeText("Bombs are the way you", "Arial", 20,255,255,255,675,90)
+                writeText("release shards. There are", "Arial", 20,255,255,255,675,120)
+                writeText("8 shards per bomb which", "Arial", 20,255,255,255,675,150)
+                writeText("move away from the", "Arial", 20,255,255,255,675,180)
+                writeText("bomb(s) from the top,", "Arial", 20,255,255,255,675,210)
+                writeText("bottom, left, right, top-left,", "Arial", 20,255,255,255,675,240)
+                writeText("top-right, bottom-left,", "Arial", 20,255,255,255,675,270)
+                writeText("and bottom-right.", "Arial", 20,255,255,255,675,300)
+                writeText("To move on use the", "Arial", 20,255,255,255,675,360)
+                writeText("[SPACE] key to place", "Arial", 20,255,255,255,675,390)
+                writeText("one Bomb.", "Arial", 20,255,255,255,675,420)
+                if key[game.K_SPACE] and bombCooldown == 0 and bombsLeft > 0:
+                    bombX.append(player.rect.x)
+                    bombY.append(player.rect.y)
+                    bomb = Bomb(player.rect.x, player.rect.y, 25, 25)
+                    all_sprites.add(bomb)
+                    bombCooldown = 3
+                    bombsLeft -= 1
+                elif bombsLeft == 0:
+                    for i in range(len(bombX)):
+                        directions = ["up", "down", "left", "right", "up_left", "up_right", "down_left", "down_right"]
+                        for direction in directions:
+                            shard = Shard(bombX[i], bombY[i], 25, 25, direction)
+                            all_sprites.add(shard)
+                            shard_group.add(shard)
+                    for bomb in all_sprites.sprites():
+                        if isinstance(bomb, Bomb):
+                            all_sprites.remove(bomb)
+                            bombX.clear()
+                            bombY.clear()
+                            explosion.play()
+            if tutorialStage == 2:
+                writeText("In some rounds there are", "Arial", 20,255,255,255,675,30)
+                writeText("multiple bombs. The", "Arial", 20,255,255,255,675,60)
+                writeText("bombs only explode once", "Arial", 20,255,255,255,675,90)
+                writeText("you have placed ALL", "Arial", 20,255,255,255,675,120)
+                writeText("bombs.", "Arial", 20,255,255,255,675,150)
+                writeText("To move on use the", "Arial", 20,255,255,255,675,210)
+                writeText("[SPACE] key to place", "Arial", 20,255,255,255,675,240)
+                writeText("five bombs.", "Arial", 20,255,255,255,675,270)
+                if key[game.K_SPACE] and bombCooldown == 0 and bombsLeft > 0:
+                    bombX.append(player.rect.x)
+                    bombY.append(player.rect.y)
+                    bomb = Bomb(player.rect.x, player.rect.y, 25, 25)
+                    all_sprites.add(bomb)
+                    bombCooldown = 3
+                    bombsLeft -= 1
+                elif bombsLeft == 0:
+                    for i in range(len(bombX)):
+                        directions = ["up", "down", "left", "right", "up_left", "up_right", "down_left", "down_right"]
+                        for direction in directions:
+                            shard = Shard(bombX[i], bombY[i], 25, 25, direction)
+                            all_sprites.add(shard)
+                            shard_group.add(shard)
+                    for bomb in all_sprites.sprites():
+                        if isinstance(bomb, Bomb):
+                            all_sprites.remove(bomb)
+                            bombX.clear()
+                            bombY.clear()
+                            explosion.play()
+            if tutorialStage == 3:
+                writeText("Now lets move on to", "Arial", 20,255,255,255,675,30)
+                writeText("Targets. Targets are", "Arial", 20,255,255,255,675,60)
+                writeText("well, targets that you", "Arial", 20,255,255,255,675,90)
+                writeText("have to hit with the", "Arial", 20,255,255,255,675,120)
+                writeText("shards from the bomb.", "Arial", 20,255,255,255,675,150)
+                writeText("There are always 8", "Arial", 20,255,255,255,675,180)
+                writeText("targets per bomb given", "Arial", 20,255,255,255,675,210)
+                writeText("so you won't be given", "Arial", 20,255,255,255,675,240)
+                writeText("any impossible rounds.", "Arial", 20,255,255,255,675,270)
+                writeText("To move on hit all", "Arial", 20,255,255,255,675,330)
+                writeText("targets shown on the", "Arial", 20,255,255,255,675,360)
+                writeText("grid.", "Arial", 20,255,255,255,675,390)
+
+                if key[game.K_SPACE] and bombCooldown == 0 and bombsLeft > 0:
+                    bombX.append(player.rect.x)
+                    bombY.append(player.rect.y)
+                    bomb = Bomb(player.rect.x, player.rect.y, 25, 25)
+                    all_sprites.add(bomb)
+                    bombCooldown = 3
+                    bombsLeft -= 1
+                elif bombsLeft == 0:
+                    for i in range(len(bombX)):
+                        directions = ["up", "down", "left", "right", "up_left", "up_right", "down_left", "down_right"]
+                        for direction in directions:
+                            shard = Shard(bombX[i], bombY[i], 25, 25, direction)
+                            all_sprites.add(shard)
+                            shard_group.add(shard)
+                    for bomb in all_sprites.sprites():
+                        if isinstance(bomb, Bomb):
+                            all_sprites.remove(bomb)
+                            bombX.clear()
+                            bombY.clear()
+                            explosion.play()
+
                 if shardsLeft == 8:
                     shardsLoaded = True
-            elif round < 7:
+
+                if targetsLeft == 0:
+                    tutorial3pass = True
+                    shardsLoaded = False
+                
+                if shardsLoaded and shardsLeft == 0:
+                    shardsLoaded = False
+                    for target in all_sprites.sprites():
+                        if isinstance(target, Target):
+                            all_sprites.remove(target)
+                            targetsLeft = 0
+                    shardsLoaded = False
+                    tutorialLoad = True
+                
+            if tutorialStage == 4:
+                writeText("Like bombs there are", "Arial", 20,255,255,255,675,30)
+                writeText("multiple targets on", "Arial", 20,255,255,255,675,60)
+                writeText("the map.", "Arial", 20,255,255,255,675,90)
+                writeText("To move on, hit all", "Arial", 20,255,255,255,675,150)
+                writeText("targets on the map.", "Arial", 20,255,255,255,675,180)
+
+                if key[game.K_SPACE] and bombCooldown == 0 and bombsLeft > 0:
+                    bombX.append(player.rect.x)
+                    bombY.append(player.rect.y)
+                    bomb = Bomb(player.rect.x, player.rect.y, 25, 25)
+                    all_sprites.add(bomb)
+                    bombCooldown = 3
+                    bombsLeft -= 1
+                elif bombsLeft == 0:
+                    for i in range(len(bombX)):
+                        directions = ["up", "down", "left", "right", "up_left", "up_right", "down_left", "down_right"]
+                        for direction in directions:
+                            shard = Shard(bombX[i], bombY[i], 25, 25, direction)
+                            all_sprites.add(shard)
+                            shard_group.add(shard)
+                    for bomb in all_sprites.sprites():
+                        if isinstance(bomb, Bomb):
+                            all_sprites.remove(bomb)
+                            bombX.clear()
+                            bombY.clear()
+                            explosion.play()
+                
                 if shardsLeft == 16:
                     shardsLoaded = True
-            else:
-                if shardsLeft == 24:
-                    shardsLoaded = True
-    
-            if targetsLeft == 0:
-                if shardsLeft == 0:
-                    round += 1
-                    roundStarted = False
+
+                if targetsLeft == 0:
+                    tutorial3pass = True
                     shardsLoaded = False
+                
+                if shardsLoaded and shardsLeft == 0:
+                    shardsLoaded = False
+                    for target in all_sprites.sprites():
+                        if isinstance(target, Target):
+                            all_sprites.remove(target)
+                            targetsLeft = 0
+                    shardsLoaded = False
+                    tutorialLoad = True
+            if tutorialStage == 5:
+                writeText("Now you are ready!", "Arial", 20,255,255,255,675,30)
+                writeText("press space to", "Arial", 20,255,255,255,675,60)
+                writeText("explode a program", "Arial", 20,255,255,255,675,90)
+                if key[game.K_SPACE]:
+                    running = False
+                
+
+        if player.rect.x == guideSquare.left and player.rect.y == guideSquare.top:
+            if tutorialStage == 0:
+                tutorialStage += 1
+                tutorialOnce = True
+            if tutorialStage == 1 and bombsLeft == 0:
+                tutorialStage += 1
+                tutorialOnce = True
+                bombsLeft = -1
+                shard_group.empty()
+            if tutorialStage == 2 and bombsLeft == 0:
+                tutorialStage += 1
+                tutorialOnce = True
+                bombsLeft = -1
+                shard_group.empty()
+            if tutorialStage == 3 and tutorial3pass:
+                tutorialStage += 1
+                tutorialOnce = True
+                bombsLeft = -1
+                shard_group.empty()
+                tutorial3pass = False
+            if tutorialStage == 4 and tutorial3pass:
+                tutorialStage += 1
+                tutorialOnce = True
+                bombsLeft = -1
+                shard_group.empty()
+            if tutorialStage == 5:
+                pass
             
-            if shardsLoaded and shardsLeft == 0:
-                shardsLoaded = False
-                for target in all_sprites.sprites():
-                    if isinstance(target, Target):
-                        all_sprites.remove(target)
-                        targetsLeft = 0
-                roundStarted = False
-                shardsLoaded = False
+
 
 
     if display == "game":
