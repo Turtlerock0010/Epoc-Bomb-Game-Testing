@@ -52,3 +52,10 @@ Version 0.016
 Version 0.017
 - new secret in the title menu
 - minor changes to the title menu
+
+Version 0.022
+- Major backend update
+- movement function created
+- bombplacement function created
+- line generation function made
+- delta time introduced

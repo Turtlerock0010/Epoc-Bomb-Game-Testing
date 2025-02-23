@@ -1,5 +1,5 @@
 # Epoc Bomb Game Thing
-# Version 0.001
+# Version 0.022
 # Developed by Turtlerock Industries led by @Commandline
 
 #sys init
@@ -23,15 +23,9 @@ game.display.set_icon(icon_image)
 
 #----game init----
 
-#music init
-game.mixer.init()
-playTheme = game.mixer.Sound("sounds/theme.mp3")
-playTitleTheme = game.mixer.Sound("sounds/titletheme.mp3")
-hit = game.mixer.Sound("sounds/hit.wav")
-explosion = game.mixer.Sound("sounds/Explosion.mp3")
-playTitleTheme.play(-1)
-
 #var init
+clock = game.time.Clock()
+lastMoveTime = 0.0
 bombCooldown = 0
 bombs = 3
 bombsLeft = 3
@@ -52,6 +46,15 @@ tutorialStage = 0
 tutorialOnce = True
 tutorial3pass = False
 tutorialLoad = False
+navigationButtonPressed = False
+
+#music init
+game.mixer.init()
+playTheme = game.mixer.Sound("sounds/theme.mp3")
+playTitleTheme = game.mixer.Sound("sounds/titletheme.mp3")
+hit = game.mixer.Sound("sounds/hit.wav")
+explosion = game.mixer.Sound("sounds/Explosion.mp3")
+playTitleTheme.play(-1)
 
 #--class init--
 class Player(game.sprite.Sprite):
@@ -141,30 +144,34 @@ class Shard(game.sprite.Sprite):
         self.rect.y = y
         self.direction = direction  # Stores direction (up, down, left, right, etc.)
         self.speed = 25  # Adjust shard speed here
+        self.lastMoveTime = 0.0
 
     def update(self):
+        self.lastMoveTime += dt
         # Update movement based on direction
-        if self.direction == "up":
-            self.rect.y -= self.speed
-        elif self.direction == "down":
-            self.rect.y += self.speed
-        elif self.direction == "left":
-            self.rect.x -= self.speed
-        elif self.direction == "right":
-            self.rect.x += self.speed
-        # Add diagonal movement logic here
-        elif self.direction == "up_left":
-            self.rect.x -= self.speed
-            self.rect.y -= self.speed
-        elif self.direction == "up_right":
-            self.rect.x += self.speed
-            self.rect.y -= self.speed
-        elif self.direction == "down_left":
-            self.rect.x -= self.speed
-            self.rect.y += self.speed
-        elif self.direction == "down_right":
-            self.rect.x += self.speed
-            self.rect.y += self.speed
+        if self.lastMoveTime >= 0.075:
+            if self.direction == "up":
+                self.rect.y -= self.speed
+            elif self.direction == "down":
+                self.rect.y += self.speed
+            elif self.direction == "left":
+                self.rect.x -= self.speed
+            elif self.direction == "right":
+                self.rect.x += self.speed
+            # Add diagonal movement logic here
+            elif self.direction == "up_left":
+                self.rect.x -= self.speed
+                self.rect.y -= self.speed
+            elif self.direction == "up_right":
+                self.rect.x += self.speed
+                self.rect.y -= self.speed
+            elif self.direction == "down_left":
+                self.rect.x -= self.speed
+                self.rect.y += self.speed
+            elif self.direction == "down_right":
+                self.rect.x += self.speed
+                self.rect.y += self.speed
+            self.lastMoveTime = 0.0
         # Add checks for walls or other objects to stop the shard movement
         if display == "game" or display == "tutorial":
             if game.sprite.spritecollideany(self, wall_group):
@@ -346,6 +353,69 @@ def writeText(input, textfont, fontsize, R, G, B, X, Y):
     textRectwrite = textwrite.get_rect()
     textRectwrite.center = (X, Y)
     screen.blit(textwrite, textRectwrite)
+
+def movement(topWall, bottomWall, leftWall, rightWall):
+    key = game.key.get_pressed()
+    global lastMoveTime
+
+    if key[game.K_a] or key[game.K_LEFT] or key[game.K_d] or key[game.K_RIGHT] or key[game.K_s] or key[game.K_DOWN] or key[game.K_w] or key[game.K_UP]:
+        lastMoveTime += dt 
+    
+    if lastMoveTime >= .075:
+        #movement checks with collision
+        if key[game.K_a] or key[game.K_LEFT]:
+            player.move(-25,0)
+            if game.sprite.collide_rect(player, leftWall):
+                player.move(25,0)
+        if key[game.K_d] or key[game.K_RIGHT]:
+            player.move(25,0)
+            if game.sprite.collide_rect(player, rightWall):
+                player.move(-25,0)
+        if key[game.K_s] or key[game.K_DOWN]:
+            player.move(0,25)
+            if game.sprite.collide_rect(player, bottomWall):
+                player.move(0,-25)
+        if key[game.K_w] or key[game.K_UP]:
+            player.move(0,-25)
+            if game.sprite.collide_rect(player, topWall):
+                player.move(0,25)
+        lastMoveTime = 0.0
+
+def bombPlacement():
+    #global variable definitization
+    global bombsLeft
+    global bombCooldown
+
+    #movement script
+    if key[game.K_SPACE] and bombCooldown == 0 and bombsLeft > 0:
+        bombX.append(player.rect.x)
+        bombY.append(player.rect.y)
+        bomb = Bomb(player.rect.x, player.rect.y, 25, 25)
+        all_sprites.add(bomb)
+        bombCooldown = 3
+        bombsLeft -= 1
+    elif bombsLeft == 0:
+        for i in range(len(bombX)):
+            directions = ["up", "down", "left", "right", "up_left", "up_right", "down_left", "down_right"]
+            for direction in directions:
+                shard = Shard(bombX[i], bombY[i], 25, 25, direction)
+                all_sprites.add(shard)
+                shard_group.add(shard)
+        for bomb in all_sprites.sprites():
+            if isinstance(bomb, Bomb):
+                all_sprites.remove(bomb)
+                bombX.clear()
+                bombY.clear()
+                explosion.play()
+            #possibly important code: bombsLeft = -1
+
+def generateGridLines(startX, endX, startY, endY):
+    #grid lines generation
+    for i in range(startX, endX):
+        game.draw.line(screen, (0, 0, 0), (i * 25+25,25),(i * 25+25,550))
+    for i in range(startY, endY):
+        game.draw.line(screen, (0, 0, 0), (25,i * 25+25),(550,i * 25+25))
+
 #--end of function init--
 
 #--sprite init--
@@ -443,31 +513,17 @@ while running:
                 hit.set_volume(1)
                 explosion.set_volume(1)
                 volume = True
-      
+
     #game code
     if display == "title":
         screen.fill("white")
 
-        key = game.key.get_pressed()
-        if key[game.K_a] or key[game.K_LEFT]:
-            player.move(-25,0)
-            if game.sprite.collide_rect(player, leftBorderTitle):
-                player.move(25,0)
-        if key[game.K_d] or key[game.K_RIGHT]:
-            player.move(25,0)
-            if game.sprite.collide_rect(player, rightBorderTitle):
-                player.move(-25,0)
-        if key[game.K_s] or key[game.K_DOWN]:
-            player.move(0,25)
-            if game.sprite.collide_rect(player, bottomBorderTitle):
-                player.move(0,-25)
-        if key[game.K_w] or key[game.K_UP]:
-            player.move(0,-25)
-            if game.sprite.collide_rect(player, topBorderTitle):
-                player.move(0,25)
+        movement(topBorderTitle, bottomBorderTitle, leftBorderTitle, rightBorderTitle)
+
         title_sprites.update()
         title_sprites.draw(screen)
 
+        #dev keys
         if key[game.K_k]:
             createTargetsTitle()
         if key[game.K_l]:
@@ -520,16 +576,21 @@ while running:
         writeText("Tutorial: T", "impact", 50,0,0,0,640,540)
         writeText("Tutorial: T", "impact", 50,255,255,255,637,537)
 
-        if key[game.K_q]:
-            if buttonIndex > 1:
-                buttonIndex -= 1
-            else:
-                buttonIndex = 3
-        if key[game.K_e]:
-            if buttonIndex < 3:
-                buttonIndex += 1
-            else:
-                buttonIndex = 1
+        if not navigationButtonPressed:
+            navigationButtonPressed = True
+            if key[game.K_q]:
+                if buttonIndex > 1:
+                    buttonIndex -= 1
+                else:
+                    buttonIndex = 3
+            if key[game.K_e]:
+                if buttonIndex < 3:
+                    buttonIndex += 1
+                else:
+                    buttonIndex = 1
+        
+        if not key[game.K_q] and not key[game.K_e]:
+            navigationButtonPressed = False
 
         if buttonIndex == 1:
             BarX = 25
@@ -586,10 +647,7 @@ while running:
         #--detail draw--
 
         #grid lines
-        for i in range(21):
-            game.draw.line(screen, (0, 0, 0), (i * 25+25,25),(i * 25+25,550))
-        for i in range(21):
-            game.draw.line(screen, (0, 0, 0), (25,i * 25+25),(550,i * 25+25))
+        generateGridLines(0,21,0,21)
 
         #functional components
         all_sprites.update()
@@ -604,24 +662,7 @@ while running:
 
         #--End of Detail Draw--
 
-        #player actions
-        key = game.key.get_pressed()
-        if key[game.K_a] or key[game.K_LEFT]:
-            player.move(-25,0)
-            if game.sprite.collide_rect(player, leftBorder):
-                player.move(25,0)
-        if key[game.K_d] or key[game.K_RIGHT]:
-            player.move(25,0)
-            if game.sprite.collide_rect(player, rightBorder):
-                player.move(-25,0)
-        if key[game.K_s] or key[game.K_DOWN]:
-            player.move(0,25)
-            if game.sprite.collide_rect(player, bottomBorder):
-                player.move(0,-25)
-        if key[game.K_w] or key[game.K_UP]:
-            player.move(0,-25)
-            if game.sprite.collide_rect(player, topBorder):
-                player.move(0,25)
+        movement(topBorder, bottomBorder, leftBorder, rightBorder)
 
         if bombCooldown > 0:
             bombCooldown -= 1
@@ -678,26 +719,8 @@ while running:
                 writeText("To move on use the", "Arial", 20,255,255,255,675,360)
                 writeText("[SPACE] key to place", "Arial", 20,255,255,255,675,390)
                 writeText("one Bomb.", "Arial", 20,255,255,255,675,420)
-                if key[game.K_SPACE] and bombCooldown == 0 and bombsLeft > 0:
-                    bombX.append(player.rect.x)
-                    bombY.append(player.rect.y)
-                    bomb = Bomb(player.rect.x, player.rect.y, 25, 25)
-                    all_sprites.add(bomb)
-                    bombCooldown = 3
-                    bombsLeft -= 1
-                elif bombsLeft == 0:
-                    for i in range(len(bombX)):
-                        directions = ["up", "down", "left", "right", "up_left", "up_right", "down_left", "down_right"]
-                        for direction in directions:
-                            shard = Shard(bombX[i], bombY[i], 25, 25, direction)
-                            all_sprites.add(shard)
-                            shard_group.add(shard)
-                    for bomb in all_sprites.sprites():
-                        if isinstance(bomb, Bomb):
-                            all_sprites.remove(bomb)
-                            bombX.clear()
-                            bombY.clear()
-                            explosion.play()
+                bombPlacement()
+
             if tutorialStage == 2:
                 writeText("In some rounds there are", "Arial", 20,255,255,255,675,30)
                 writeText("multiple bombs. The", "Arial", 20,255,255,255,675,60)
@@ -707,26 +730,8 @@ while running:
                 writeText("To move on use the", "Arial", 20,255,255,255,675,210)
                 writeText("[SPACE] key to place", "Arial", 20,255,255,255,675,240)
                 writeText("five bombs.", "Arial", 20,255,255,255,675,270)
-                if key[game.K_SPACE] and bombCooldown == 0 and bombsLeft > 0:
-                    bombX.append(player.rect.x)
-                    bombY.append(player.rect.y)
-                    bomb = Bomb(player.rect.x, player.rect.y, 25, 25)
-                    all_sprites.add(bomb)
-                    bombCooldown = 3
-                    bombsLeft -= 1
-                elif bombsLeft == 0:
-                    for i in range(len(bombX)):
-                        directions = ["up", "down", "left", "right", "up_left", "up_right", "down_left", "down_right"]
-                        for direction in directions:
-                            shard = Shard(bombX[i], bombY[i], 25, 25, direction)
-                            all_sprites.add(shard)
-                            shard_group.add(shard)
-                    for bomb in all_sprites.sprites():
-                        if isinstance(bomb, Bomb):
-                            all_sprites.remove(bomb)
-                            bombX.clear()
-                            bombY.clear()
-                            explosion.play()
+                bombPlacement()
+
             if tutorialStage == 3:
                 writeText("Now lets move on to", "Arial", 20,255,255,255,675,30)
                 writeText("Targets. Targets are", "Arial", 20,255,255,255,675,60)
@@ -741,26 +746,7 @@ while running:
                 writeText("targets shown on the", "Arial", 20,255,255,255,675,360)
                 writeText("grid.", "Arial", 20,255,255,255,675,390)
 
-                if key[game.K_SPACE] and bombCooldown == 0 and bombsLeft > 0:
-                    bombX.append(player.rect.x)
-                    bombY.append(player.rect.y)
-                    bomb = Bomb(player.rect.x, player.rect.y, 25, 25)
-                    all_sprites.add(bomb)
-                    bombCooldown = 3
-                    bombsLeft -= 1
-                elif bombsLeft == 0:
-                    for i in range(len(bombX)):
-                        directions = ["up", "down", "left", "right", "up_left", "up_right", "down_left", "down_right"]
-                        for direction in directions:
-                            shard = Shard(bombX[i], bombY[i], 25, 25, direction)
-                            all_sprites.add(shard)
-                            shard_group.add(shard)
-                    for bomb in all_sprites.sprites():
-                        if isinstance(bomb, Bomb):
-                            all_sprites.remove(bomb)
-                            bombX.clear()
-                            bombY.clear()
-                            explosion.play()
+                bombPlacement()
 
                 if shardsLeft == 8:
                     shardsLoaded = True
@@ -785,26 +771,7 @@ while running:
                 writeText("To move on, hit all", "Arial", 20,255,255,255,675,150)
                 writeText("targets on the map.", "Arial", 20,255,255,255,675,180)
 
-                if key[game.K_SPACE] and bombCooldown == 0 and bombsLeft > 0:
-                    bombX.append(player.rect.x)
-                    bombY.append(player.rect.y)
-                    bomb = Bomb(player.rect.x, player.rect.y, 25, 25)
-                    all_sprites.add(bomb)
-                    bombCooldown = 3
-                    bombsLeft -= 1
-                elif bombsLeft == 0:
-                    for i in range(len(bombX)):
-                        directions = ["up", "down", "left", "right", "up_left", "up_right", "down_left", "down_right"]
-                        for direction in directions:
-                            shard = Shard(bombX[i], bombY[i], 25, 25, direction)
-                            all_sprites.add(shard)
-                            shard_group.add(shard)
-                    for bomb in all_sprites.sprites():
-                        if isinstance(bomb, Bomb):
-                            all_sprites.remove(bomb)
-                            bombX.clear()
-                            bombY.clear()
-                            explosion.play()
+                bombPlacement()
                 
                 if shardsLeft == 16:
                     shardsLoaded = True
@@ -865,10 +832,7 @@ while running:
         #--detail draw--
 
         #grid lines
-        for i in range(21):
-            game.draw.line(screen, (0, 0, 0), (i * 25+25,25),(i * 25+25,550))
-        for i in range(21):
-            game.draw.line(screen, (0, 0, 0), (25,i * 25+25),(550,i * 25+25))
+        generateGridLines(0,21,0,21)
 
         #functional components
         all_sprites.update()
@@ -898,49 +862,8 @@ while running:
         #--End of Detail Draw--
 
         #player actions
-        key = game.key.get_pressed()
-        if key[game.K_a] or key[game.K_LEFT]:
-            player.move(-25,0)
-            if game.sprite.collide_rect(player, leftBorder):
-                player.move(25,0)
-        if key[game.K_d] or key[game.K_RIGHT]:
-            player.move(25,0)
-            if game.sprite.collide_rect(player, rightBorder):
-                player.move(-25,0)
-        if key[game.K_s] or key[game.K_DOWN]:
-            player.move(0,25)
-            if game.sprite.collide_rect(player, bottomBorder):
-                player.move(0,-25)
-        if key[game.K_w] or key[game.K_UP]:
-            player.move(0,-25)
-            if game.sprite.collide_rect(player, topBorder):
-                player.move(0,25)
-        
-        if key[game.K_SPACE] and bombCooldown == 0 and bombsLeft > 0:
-            bombX.append(player.rect.x)
-            bombY.append(player.rect.y)
-            bomb = Bomb(player.rect.x, player.rect.y, 25, 25)
-            all_sprites.add(bomb)
-            bombCooldown = 3
-            bombsLeft -= 1
-        elif bombsLeft == 0:
-            for i in range(len(bombX)):
-                directions = ["up", "down", "left", "right", "up_left", "up_right", "down_left", "down_right"]
-                for direction in directions:
-                    shard = Shard(bombX[i], bombY[i], 25, 25, direction)
-                    all_sprites.add(shard)
-                    shard_group.add(shard)
-            for bomb in all_sprites.sprites():
-                if isinstance(bomb, Bomb):
-                    all_sprites.remove(bomb)
-                    bombX.clear()
-                    bombY.clear()
-                    explosion.play()
-            #possibly important code: bombsLeft = -1
-
-        if bombCooldown > 0:
-            bombCooldown -= 1
-
+        movement(topBorder, bottomBorder, leftBorder, rightBorder)
+        bombPlacement()
         #dev keys
         if key[game.K_k]:
             createTargets()
@@ -957,6 +880,10 @@ while running:
                 shard = Shard(player.rect.x, player.rect.y, 25, 25, direction)
                 all_sprites.add(shard)
                 shard_group.add(shard)
+
+        if bombCooldown > 0:
+            bombCooldown -= 1
+
 
         #check shards
         shardsLeft = len([s for s in shard_group if isinstance(s, Shard)])
@@ -1005,6 +932,7 @@ while running:
                 roundStarted = False
                 shardsLoaded = False
 
-    time.sleep(0.08333)
+    #time.sleep(0.08333)
+    dt = clock.tick(60) / 1000.0
     game.display.update()
 game.quit()
