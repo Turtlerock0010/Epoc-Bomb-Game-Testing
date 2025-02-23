@@ -47,13 +47,14 @@ tutorialOnce = True
 tutorial3pass = False
 tutorialLoad = False
 navigationButtonPressed = False
+spacebarWait = False
 
 #music init
 game.mixer.init()
 playTheme = game.mixer.Sound("sounds/theme.mp3")
 playTitleTheme = game.mixer.Sound("sounds/titletheme.mp3")
 hit = game.mixer.Sound("sounds/hit.wav")
-explosion = game.mixer.Sound("sounds/Explosion.mp3")
+explosion = game.mixer.Sound("sounds/explosion.wav")
 playTitleTheme.play(-1)
 
 #--class init--
@@ -385,29 +386,35 @@ def bombPlacement():
     #global variable definitization
     global bombsLeft
     global bombCooldown
+    global spacebarWait
 
     #movement script
-    if key[game.K_SPACE] and bombCooldown == 0 and bombsLeft > 0:
-        bombX.append(player.rect.x)
-        bombY.append(player.rect.y)
-        bomb = Bomb(player.rect.x, player.rect.y, 25, 25)
-        all_sprites.add(bomb)
-        bombCooldown = 3
-        bombsLeft -= 1
-    elif bombsLeft == 0:
-        for i in range(len(bombX)):
-            directions = ["up", "down", "left", "right", "up_left", "up_right", "down_left", "down_right"]
-            for direction in directions:
-                shard = Shard(bombX[i], bombY[i], 25, 25, direction)
-                all_sprites.add(shard)
-                shard_group.add(shard)
-        for bomb in all_sprites.sprites():
-            if isinstance(bomb, Bomb):
-                all_sprites.remove(bomb)
-                bombX.clear()
-                bombY.clear()
-                explosion.play()
-            #possibly important code: bombsLeft = -1
+    if not spacebarWait:
+        spacebarWait = True
+        if key[game.K_SPACE] and bombCooldown == 0 and bombsLeft > 0:
+            bombX.append(player.rect.x)
+            bombY.append(player.rect.y)
+            bomb = Bomb(player.rect.x, player.rect.y, 25, 25)
+            all_sprites.add(bomb)
+            bombCooldown = 3
+            bombsLeft -= 1
+        elif bombsLeft == 0:
+            for i in range(len(bombX)):
+                directions = ["up", "down", "left", "right", "up_left", "up_right", "down_left", "down_right"]
+                for direction in directions:
+                    shard = Shard(bombX[i], bombY[i], 25, 25, direction)
+                    all_sprites.add(shard)
+                    shard_group.add(shard)
+            for bomb in all_sprites.sprites():
+                if isinstance(bomb, Bomb):
+                    all_sprites.remove(bomb)
+                    bombX.clear()
+                    bombY.clear()
+                    explosion.play()
+                #possibly important code: bombsLeft = -1
+    if not key[game.K_SPACE]:
+        spacebarWait = False
+    
 
 def generateGridLines(startX, endX, startY, endY):
     #grid lines generation
