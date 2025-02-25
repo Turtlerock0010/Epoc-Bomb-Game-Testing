@@ -1,4 +1,4 @@
-![Player Square](https://github.com/user-attachments/assets/64210db7-ea6c-4f46-8679-ef905d58e08d)# Epoc-Bomb-Game-Thing
+# Epoc-Bomb-Game-Thing
 A game about strategy and placement!
 
 
