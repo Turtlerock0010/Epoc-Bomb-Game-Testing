@@ -59,3 +59,16 @@ Version 0.022
 - bombplacement function created
 - line generation function made
 - delta time introduced
+
+Version 23, Enlightened Depths Update
+(Keynotes)
+- Updated sprite textures
+- Lasers & Diodes added
+- Grid Holes added
+- New version system
+(Explanation)
+- New sprite textures which enhance visibilty of sprites also they look cool
+- Diode sprite added that can summon the Laser sprite
+- Laser sprite, when touching the player forces all bombs of the player to drop
+- Grid Holes are randomly placed throughout the map preventing player movement
+- New version system where instead of the game being tracked by the format Version 0.001, it will now be tracked as Version 23 and the previous versions will apply to the rule, meaning the previous version (Version 0.022) is now treated as Version 22. Any version deemed a major update will be given a designated update name.

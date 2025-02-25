@@ -23,3 +23,4 @@ screen.fill("gray")
             writeText("Epoc Bomb Game Thing, A", "Arial",255,255,255,400,300)
             writeText("Continuation of Epic Bomb", "Arial",255,255,255,400,350)
             writeText("Game On Scratch", "Arial",255,255,255,400,400)
+            
