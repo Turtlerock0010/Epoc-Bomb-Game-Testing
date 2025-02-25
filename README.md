@@ -35,12 +35,12 @@ This is going to be a rapid fire information page so here it is:
 ## Important Updates
 This section is dedicated to listing major versions that have fundemental aspects of the game completely changed or added.
 
-Version 0.010
+### Version 0.010
 - Adds a round system
 - Adds a title screen
 - its version 10
 
-Version 0.016
+### Version 0.016
 - Complete overhaul of the title screen
 - Complete overhaul of credits tab
 - Added a nonfunctional tutorial button
@@ -49,11 +49,11 @@ Version 0.016
 - new text used
 - improved icon
 
-Version 0.017
+### Version 0.017
 - new secret in the title menu
 - minor changes to the title menu
 
-Version 0.022
+### Version 0.022
 - Major backend update
 - movement function created
 - bombplacement function created
