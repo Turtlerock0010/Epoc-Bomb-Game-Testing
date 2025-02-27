@@ -721,6 +721,7 @@ BarY = 585
 #game detail
 sidePanel = game.Rect(575,0,225,600)
 infoBox = game.Rect(560,400,230,190)
+infoBoxShadow = game.Rect(555,395,230,190)
 
 #tutorial detail
 tutorialBox = game.Rect(560,15,230,575)
@@ -744,21 +745,25 @@ while running:
     #sound controls
     key = game.key.get_pressed()
     if key[game.K_m]:
-            if volume:
-                playTitleTheme.set_volume(0) 
-                hit.set_volume(0)
-                explosion.set_volume(0)
-                laserSFX.set_volume(0)
-                volume = False
-            else:
-                if display == "title":
-                    playTitleTheme.set_volume(1) 
-                if display == "game" or display == "tutorial":
-                    playTitleTheme.set_volume(.25) 
-                hit.set_volume(1)
-                explosion.set_volume(1)
-                laserSFX.set_volume(1)
-                volume = True
+        if volume:
+            playTitleTheme.set_volume(0) 
+            hit.set_volume(0)
+            explosion.set_volume(0)
+            laserSFX.set_volume(0)
+            volume = False
+        else:
+            if display == "title":
+                playTitleTheme.set_volume(1) 
+            if display == "game" or display == "tutorial":
+                playTitleTheme.set_volume(.25) 
+            hit.set_volume(1)
+            explosion.set_volume(1)
+            laserSFX.set_volume(1)
+            volume = True
+    
+    #mouse checks
+    mousePos = game.mouse.get_pos()
+    mouseButtons = game.mouse.get_pressed()
 
     #game code
     if display == "title":
@@ -819,12 +824,26 @@ while running:
         writeText("Game Thing", "impact", 100,255,255,255,255,260)
 
         #boxes
-        game.draw.rect(screen, (76, 160, 90), playButtonShadow, border_radius=10)
-        game.draw.rect(screen, (96, 180, 110), playButton, border_radius=10)
-        game.draw.rect(screen, (76, 160, 90), creditsButtonShadow, border_radius=10)
-        game.draw.rect(screen, (96, 180, 110), creditsButton, border_radius=10)
-        game.draw.rect(screen, (76, 160, 90), tutorialButtonShadow, border_radius=10)
-        game.draw.rect(screen, (96, 180, 110), tutorialButton, border_radius=10)
+        if playButton.collidepoint(mousePos):
+            game.draw.rect(screen, (96, 180, 110), playButtonShadow, border_radius=10)
+            game.draw.rect(screen, (116, 200, 130), playButton, border_radius=10)
+        else:
+            game.draw.rect(screen, (76, 160, 90), playButtonShadow, border_radius=10)
+            game.draw.rect(screen, (96, 180, 110), playButton, border_radius=10)
+
+        if creditsButton.collidepoint(mousePos):
+            game.draw.rect(screen, (96, 180, 110), creditsButtonShadow, border_radius=10)
+            game.draw.rect(screen, (116, 200, 130), creditsButton, border_radius=10)
+        else:
+            game.draw.rect(screen, (76, 160, 90), creditsButtonShadow, border_radius=10)
+            game.draw.rect(screen, (96, 180, 110), creditsButton, border_radius=10)
+
+        if tutorialButton.collidepoint(mousePos):
+            game.draw.rect(screen, (96, 180, 110), tutorialButtonShadow, border_radius=10)
+            game.draw.rect(screen, (116, 200, 130), tutorialButton, border_radius=10)
+        else:
+            game.draw.rect(screen, (76, 160, 90), tutorialButtonShadow, border_radius=10)
+            game.draw.rect(screen, (96, 180, 110), tutorialButton, border_radius=10)
 
         #draws button text
         writeText("Play: B", "impact", 50,0,0,0,140,540)
@@ -860,7 +879,7 @@ while running:
         
         game.draw.rect(screen, (255, 255, 255), (BarX, BarY, barW, barH), border_radius=10)
 
-        if key[game.K_c] or (key[game.K_RETURN] and buttonIndex == 2):
+        if key[game.K_c] or (key[game.K_RETURN] and buttonIndex == 2) or (creditsButton.collidepoint(mousePos) and mouseButtons[0]):
             playTitleTheme.set_volume(.25)
             rect_surface = game.Surface((800, 600), game.SRCALPHA)
             rect_surface.fill((0, 0, 0, 128))
@@ -878,7 +897,6 @@ while running:
             writeText("mess around in the title?", "Arial",30,255,255,255,400,475+50)
             writeText("Use WASD, U and K", "Arial",30,255,255,255,400,500+50)
         
-
         if shadowBoxStart:
             shadowBoxAlpha -= 10
             shadowBox.set_alpha(shadowBoxAlpha)
@@ -886,10 +904,10 @@ while running:
         if shadowBoxAlpha < 0:
             shadowBoxStart = False
         
-        if not (key[game.K_c] or (key[game.K_RETURN] and buttonIndex == 2)):
+        if not (key[game.K_c] or (key[game.K_RETURN] and buttonIndex == 2 or (creditsButton.collidepoint(mousePos) and mouseButtons[0]))):
             playTitleTheme.set_volume(1)
         
-        if key[game.K_t] or (key[game.K_RETURN] and buttonIndex == 3):
+        if key[game.K_t] or (key[game.K_RETURN] and buttonIndex == 3) or (tutorialButton.collidepoint(mousePos) and mouseButtons[0]):
                     display = "tutorial"
                     playTitleTheme.set_volume(.25)
                     player.goto(275,275)
@@ -904,7 +922,7 @@ while running:
                     targetList.clear()
                     shard_group.empty()
 
-        if key[game.K_b] or (key[game.K_RETURN] and buttonIndex == 1):
+        if key[game.K_b] or (key[game.K_RETURN] and buttonIndex == 1 or (playButton.collidepoint(mousePos) and mouseButtons[0])):
             display = "game"
             playTitleTheme.set_volume(.25)
             player.goto(275,275)
@@ -918,6 +936,7 @@ while running:
                     target = None
             targetList.clear()
             shard_group.empty()
+
     
     if display == "tutorial":
         screen.fill("white")
@@ -1125,14 +1144,18 @@ while running:
 
         #boxes
         game.draw.rect(screen, (56, 140, 70), sidePanel)
+        game.draw.rect(screen, (36, 120, 50), infoBoxShadow, border_radius=10)
         game.draw.rect(screen, (96, 180, 110), infoBox, border_radius=10)
 
-
         #info box text
-        writeText("Score: " + str(score), "Arial", 25,255,255,255,650,425)
-        writeText("Targets: " + str(targetsLeft), "Arial", 25,255,255,255,650,470)
-        writeText("Round: " + str(round), "Arial", 25,255,255,255,650,515)
-        writeText("Bombs: " + str(bombsLeft), "Arial", 25,255,255,255,650,560)
+        writeText("SCORE: " + str(score), "Arial Black", 25,0,0,0,672,427)
+        writeText("SCORE: " + str(score), "Arial Black", 25,255,255,255,670,425)
+        writeText("TARGETS: " + str(targetsLeft), "Arial Black", 25,0,0,0,672,472)
+        writeText("TARGETS: " + str(targetsLeft), "Arial Black", 25,255,255,255,670,470)
+        writeText("ROUND: " + str(round), "Arial Black", 25,0,0,0,672,517)
+        writeText("ROUND: " + str(round), "Arial Black", 25,255,255,255,670,515)
+        writeText("BOMBS: " + str(bombsLeft), "Arial Black", 25,0,0,0,672,562)
+        writeText("BOMBS: " + str(bombsLeft), "Arial Black", 25,255,255,255,670,560)
 
         #logo image
         newimage = game.transform.scale(game.image.load('images/oldicon1.png'), (150, 150))
