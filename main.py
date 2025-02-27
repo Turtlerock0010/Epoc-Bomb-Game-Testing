@@ -1,5 +1,5 @@
 # Epoc Bomb Game Thing
-# Version 0.022
+# Version 24
 # Developed by Turtlerock Industries led by @Commandline
 # A grid-based strategy game
 
@@ -36,7 +36,7 @@ score = 0
 volume = True
 targetsLeft = 0
 round = 1
-maxRounds = 9
+maxRounds = 37
 roundStarted = False
 shardsLeft = -1
 shardsLoaded = False
@@ -119,7 +119,6 @@ class Bomb(game.sprite.Sprite):
         self.kill()
         del self
         self = None
-
 
 
 class Target(game.sprite.Sprite):
@@ -275,28 +274,32 @@ class Diode(game.sprite.Sprite):
         #positive X gen
         for i in range(1, 21):
             laser = Laser(self.rect.x + i * 25, self.rect.y, 25, 25, "horizontal")
-            laser.update()
+            if laser.update() == True:
+                break
             all_sprites.add(laser)
             laser_group.add(laser)
         
         #negative X gen
         for i in range(1, 21):
             laser = Laser(self.rect.x + -i * 25, self.rect.y, 25, 25, "horizontal")
-            laser.update()
+            if laser.update() == True:
+                break
             all_sprites.add(laser)
             laser_group.add(laser)
 
         #positive Y gen
         for i in range(1, 21):
             laser = Laser(self.rect.x, self.rect.y + i * 25, 25, 25, "vertical")
-            laser.update()
+            if laser.update() == True:
+                break
             all_sprites.add(laser)
             laser_group.add(laser)
         
         #negative Y gen
         for i in range(1, 21):
             laser = Laser(self.rect.x, self.rect.y + -i * 25, 25, 25, "vertical")
-            laser.update()
+            if laser.update() == True:
+                break
             all_sprites.add(laser)
             laser_group.add(laser)
     
@@ -309,6 +312,7 @@ class Diode(game.sprite.Sprite):
                 laser.kill()
                 del laser
                 laser = None
+
 
 class Laser(game.sprite.Sprite):
     def __init__(self, x, y, width, height, direction):
@@ -333,6 +337,7 @@ class Laser(game.sprite.Sprite):
             self.kill()
             del self
             self = None
+            return True
 
     def move(self, dx, dy):
         # Update the sprite's position and store it
@@ -1130,7 +1135,7 @@ while running:
         writeText("Bombs: " + str(bombsLeft), "Arial", 25,255,255,255,650,560)
 
         #logo image
-        newimage = game.transform.scale(game.image.load('images/icon.png'), (150, 150))
+        newimage = game.transform.scale(game.image.load('images/oldicon1.png'), (150, 150))
         screen.blit(newimage,(600,25))
 
         #logo text
@@ -1221,23 +1226,73 @@ while running:
                 roundStarted = True
                 if round < 4:
                     createTargets()
-                    for i in range(50):
-                        createDiode()
                     bombsLeft = 1
                 elif round < 7:
                     createTargets()
                     createTargets()
-                    for i in range(5):
-                        createDiode()
                     bombsLeft = 2
-                    for i in range(10):
-                        createHole()
-                else:
+                elif round < 10:
                     createTargets()
                     createTargets()
                     createTargets()
                     bombsLeft = 3
+                elif round < 13:
+                    createTargets()
+                    bombsLeft = 1
+                    for i in range(10):
+                        createHole()
+                elif round < 16:
+                    createTargets()
+                    createTargets()
                     for i in range(20):
+                        createHole()
+                    bombsLeft = 2
+                elif round < 19:
+                    createTargets()
+                    createTargets()
+                    createTargets()
+                    for i in range(30):
+                        createHole()
+                    bombsLeft = 3
+                elif round < 22:
+                    createTargets()
+                    bombsLeft = 1
+                    createDiode()
+                elif round < 25:
+                    createTargets()
+                    createTargets()
+                    bombsLeft = 2
+                    for i in range(3):
+                        createDiode()
+                elif round < 28:
+                    createTargets()
+                    createTargets()
+                    createTargets()
+                    bombsLeft = 3
+                    for i in range(5):
+                        createDiode()
+                elif round < 31:
+                    createTargets()
+                    bombsLeft = 1
+                    createDiode()
+                    for i in range(10):
+                        createHole()
+                elif round < 34:
+                    createTargets()
+                    createTargets()
+                    bombsLeft = 2
+                    for i in range(3):
+                        createDiode()
+                    for i in range(30):
+                        createHole()
+                elif round < 37:
+                    createTargets()
+                    createTargets()
+                    createTargets()
+                    bombsLeft = 3
+                    for i in range(5):
+                        createDiode()
+                    for i in range(50):
                         createHole()
 
             if round < 4:
@@ -1246,7 +1301,34 @@ while running:
             elif round < 7:
                 if shardsLeft == 16:
                     shardsLoaded = True
-            else:
+            elif round < 10:
+                if shardsLeft == 24:
+                    shardsLoaded = True
+            elif round < 13:
+                if shardsLeft == 8:
+                    shardsLoaded = True
+            elif round < 16:
+                if shardsLeft == 16:
+                    shardsLoaded = True
+            elif round < 19:
+                if shardsLeft == 24:
+                    shardsLoaded = True
+            elif round < 22:
+                if shardsLeft == 8:
+                    shardsLoaded = True
+            elif round < 25:
+                if shardsLeft == 16:
+                    shardsLoaded = True
+            elif round < 28:
+                if shardsLeft == 24:
+                    shardsLoaded = True
+            elif round < 31:
+                if shardsLeft == 8:
+                    shardsLoaded = True
+            elif round < 34:
+                if shardsLeft == 16:
+                    shardsLoaded = True
+            elif round < 37:
                 if shardsLeft == 24:
                     shardsLoaded = True
     

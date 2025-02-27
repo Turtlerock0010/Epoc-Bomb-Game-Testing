@@ -74,3 +74,24 @@ This section is dedicated to listing major versions that have fundemental aspect
 - Laser sprite, when touching the player forces all bombs of the player to drop
 - Grid Holes are randomly placed throughout the map preventing player movement
 - New version system where instead of the game being tracked by the format Version 0.001, it will now be tracked as Version 23 and the previous versions will apply to the rule, meaning the previous version (Version 0.022) is now treated as Version 22. Any version deemed a major update will be given a designated update name.
+
+### Version 24
+
+#### (Keynotes)
+- Standard round system made
+- Minor tweaks
+- Minor optimizations
+
+#### (Explanation)
+- Intended rounds beyond 9 have been made
+    - Grid Holes and Laser Diodes have introduction rounds
+    - Hard coded rounds now go up to 36
+- General code changes to enhance readability, and standardization
+- Minor optimizations to improve performance
+    - If a laser sprite is found to be out of bounds then it would force further sprites to not generate
+
+#### (Goals)
+- Improve performance when creating laser sprites
+- Looking to see if any memory leaks have been found
+- Possible sprite abstraction to allow for better time reading
+- Replaced main theme due to copyright
