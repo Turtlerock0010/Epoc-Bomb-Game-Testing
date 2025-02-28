@@ -95,3 +95,20 @@ This section is dedicated to listing major versions that have fundemental aspect
 - Looking to see if any memory leaks have been found
 - Possible sprite abstraction to allow for better time reading
 - Replaced main theme due to copyright
+
+### Version 25 and 26
+Lol forgor to update on 25 but here it is combined with 26
+
+#### (Keynotes)
+- Anti aliasing test on title screen
+- Clickable buttons on title screen (finally)
+- Mouse input capability
+
+#### (Explanation)
+- Anti aliased polygons have been added ontop of existing polygon to get an anti aliased lines
+- Buttons now turn to a lighter color when the mouse is hovering over it to enhance game accessability (should have been the first thing i done with the buttons but oh well)
+- Mouse inputs are now imported so expect more button functionality
+
+#### (Goals)
+- More mouse utilization
+- More anti aliased lines

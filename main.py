@@ -1,5 +1,5 @@
 # Epoc Bomb Game Thing
-# Version 24
+# Version 26
 # Developed by Turtlerock Industries led by @Commandline
 # A grid-based strategy game
 
@@ -814,8 +814,11 @@ while running:
         game.draw.rect(screen, (56, 140, 70), coverbox1)
         game.draw.rect(screen, (56, 140, 70), coverbox2)
         game.draw.polygon(screen, (0, 0, 0), [(204, 0), (202, 398), (802, 398)])
+        gfxdraw.aapolygon(screen, [(205, 0), (203, 398), (803, 398)], (0, 0, 0))
         game.draw.polygon(screen, (56, 140, 70), [(200, 0), (200, 400), (800, 400)])
+        gfxdraw.aapolygon(screen, [(201, 0), (201, 400), (801, 400)], (56, 140, 70)) 
         game.draw.polygon(screen, (96, 180, 110), [(10, 105), (10, 325), (650, 325), (330, 105)])
+        gfxdraw.aapolygon(screen, [(10, 105), (10, 325), (650, 325), (330, 105)], (96, 180, 110)) 
         
         #draws the title
         writeText("Epoc Bomb", "impact", 75,0,0,0,190,155)
