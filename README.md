@@ -112,3 +112,20 @@ Lol forgor to update on 25 but here it is combined with 26
 #### (Goals)
 - More mouse utilization
 - More anti aliased lines
+
+### Version 27, Semi Official Release
+Ok so I wanted to upload this project to Itch.io, so inorder to do it I would need to make a syncronized version for Mac OS and Windows and get rid of a few bugs so yes, Version 1 is the official release date, but Version 27 is the executable release date.
+
+#### (Keynotes)
+- Different sprites based on OS for compatibility
+- Functionality to go back to homescreen after tutorial
+
+#### (Explanation)
+- A new variable, "os" has been added that checks for the current OS such as darwin for Mac OS and win32 for Windows.
+- A new library, sys has been added to help with the checks of operating system.
+- The tutorial will now bring you back to the main menu after completion so you don't need to close out the game.
+- Start title code moved into the game loop to service the new functionality.
+
+#### (Goals)
+- Better tutorial transitions
+- Possibly more transitions

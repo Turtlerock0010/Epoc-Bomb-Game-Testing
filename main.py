@@ -1,5 +1,5 @@
 # Epoc Bomb Game Thing
-# Version 26
+# Version 27
 # Developed by Turtlerock Industries led by @Commandline
 # A grid-based strategy game
 
@@ -8,6 +8,7 @@ import pygame as game
 import time
 import random
 import math
+import sys
 from pygame import mixer
 from pygame import gfxdraw
 
@@ -25,6 +26,7 @@ game.display.set_icon(icon_image)
 #----game init----
 
 #var init
+os = sys.platform
 clock = game.time.Clock()
 lastMoveTime = 0.0
 bombCooldown = 0
@@ -55,6 +57,7 @@ shadowBoxAlpha = 255
 laserTimer = 0.0
 laserOn = False
 touchedByLaser = False
+atTitleStart = True
 
 #music init
 game.mixer.init()
@@ -70,7 +73,10 @@ class Player(game.sprite.Sprite):
     def __init__(self, x, y, width, height):
         super().__init__()
         self.image = game.Surface([width, height])
-        self.image = game.transform.scale(game.image.load("images/squareDesigns/playerSquare.svg").convert_alpha(), (25, 25))
+        if os == "darwin":
+            self.image = game.transform.scale(game.image.load("images/squareDesignsMac/playerSquare.svg").convert_alpha(), (25, 25))
+        elif os == "win32":
+            self.image = game.transform.scale(game.image.load("images/squareDesignsWin/playerSquare.svg").convert_alpha(), (25, 25))
         #self.image.fill((148, 3, 252))  # Purple color (RGB)
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -95,7 +101,10 @@ class Bomb(game.sprite.Sprite):
     def __init__(self, x, y, width, height):
         super().__init__()
         self.image = game.Surface([width, height])
-        self.image = game.transform.scale(game.image.load("images/squareDesigns/bombSquare.svg").convert_alpha(), (25, 25))
+        if os == "darwin":
+            self.image = game.transform.scale(game.image.load("images/squareDesignsMac/bombSquare.svg").convert_alpha(), (25, 25))
+        elif os == "win32":
+            self.image = game.transform.scale(game.image.load("images/squareDesignsWin/bombSquare.png").convert_alpha(), (25, 25))
         #self.image.fill((0, 0, 255))  # Purple color (RGB)
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -125,7 +134,10 @@ class Target(game.sprite.Sprite):
     def __init__(self, x, y, width, height):
         super().__init__()
         self.image = game.Surface([width, height])
-        self.image = game.transform.scale(game.image.load("images/squareDesigns/targetSquare.svg").convert_alpha(), (25, 25))
+        if os == "darwin":
+            self.image = game.transform.scale(game.image.load("images/squareDesignsMac/targetSquare.svg").convert_alpha(), (25, 25))
+        elif os == "win32":
+            self.image = game.transform.scale(game.image.load("images/squareDesignsWin/targetSquare.png").convert_alpha(), (25, 25))
         #self.image.fill((255, 0, 0))  # Red color (RGB)
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -154,7 +166,10 @@ class Shard(game.sprite.Sprite):
     def __init__(self, x, y, width, height, direction):
         super().__init__()
         self.image = game.Surface([width, height])
-        self.image = game.transform.scale(game.image.load("images/squareDesigns/shardSquare.svg").convert_alpha(), (25, 25))
+        if os == "darwin":
+            self.image = game.transform.scale(game.image.load("images/squareDesignsMac/shardSquare.svg").convert_alpha(), (25, 25))
+        elif os == "win32":
+            self.image = game.transform.scale(game.image.load("images/squareDesignsWin/shardSquare.png").convert_alpha(), (25, 25))
         #self.image.fill((249, 147, 5))  # Orange color (RGB)
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -222,7 +237,10 @@ class Hole(game.sprite.Sprite):
     def __init__(self, x, y, width, height):
         super().__init__()
         self.image = game.Surface([width, height])
-        self.image = game.transform.scale(game.image.load("images/squareDesigns/holeSquare.svg").convert_alpha(), (25, 25))
+        if os == "darwin":
+            self.image = game.transform.scale(game.image.load("images/squareDesignsMac/holeSquare.svg").convert_alpha(), (25, 25))
+        elif os == "win32":
+            self.image = game.transform.scale(game.image.load("images/squareDesignsWin/holeSquare.png").convert_alpha(), (25, 25))
         #self.image.fill((0, 0, 0))  # yellow color (RGB)
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -247,7 +265,10 @@ class Diode(game.sprite.Sprite):
     def __init__(self, x, y, width, height):
         super().__init__()
         self.image = game.Surface([width, height])
-        self.image = game.transform.scale(game.image.load("images/squareDesigns/diodeSquare.svg").convert_alpha(), (25, 25))
+        if os == "darwin":
+            self.image = game.transform.scale(game.image.load("images/squareDesignsMac/diodeSquare.svg").convert_alpha(), (25, 25))
+        elif os == "win32":
+            self.image = game.transform.scale(game.image.load("images/squareDesignsWin/diodeSquare.png").convert_alpha(), (25, 25))
         #self.image.fill((0, 0, 0))  # yellow color (RGB)
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -319,10 +340,16 @@ class Laser(game.sprite.Sprite):
         super().__init__()
         self.image = game.Surface([width, height])
         self.direction = direction
-        if self.direction == "vertical":
-            self.image = game.transform.scale(game.image.load("images/squareDesigns/verticalLaser.svg").convert_alpha(), (25, 25))
-        if self.direction == "horizontal":
-            self.image = game.transform.scale(game.image.load("images/squareDesigns/horizontalLaser.svg").convert_alpha(), (25, 25))
+        if os == "darwin":
+            if self.direction == "vertical":
+                self.image = game.transform.scale(game.image.load("images/squareDesignsMac/verticalLaser.svg").convert_alpha(), (25, 25))
+            if self.direction == "horizontal":
+                self.image = game.transform.scale(game.image.load("images/squareDesignsMac/horizontalLaser.svg").convert_alpha(), (25, 25))
+        elif os == "Windows":
+            if self.direction == "vertical":
+                self.image = game.transform.scale(game.image.load("images/squareDesignsWin/verticalLaser.png").convert_alpha(), (25, 25))
+            if self.direction == "horizontal":
+                self.image = game.transform.scale(game.image.load("images/squareDesignsWin/horizontalLaser.png").convert_alpha(), (25, 25))
         #self.image.fill((0, 0, 0))  # yellow color (RGB)
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -731,11 +758,8 @@ guideSquare = game.Rect(25,25,25,25)
 #---end of game init---
 
 #adds test targets for player use
-for i in range(10):
-    createTargetsTitle()
 
 #game loop
-player.goto(400,100)
 running = True
 while running:
     for event in game.event.get():
@@ -773,6 +797,12 @@ while running:
 
         title_sprites.update()
         title_sprites.draw(screen)
+
+        if atTitleStart:
+            atTitleStart = False
+            for i in range(10):
+                createTargetsTitle()
+            player.goto(400,100)
 
         #dev keys
 
@@ -816,7 +846,7 @@ while running:
         game.draw.polygon(screen, (0, 0, 0), [(204, 0), (202, 398), (802, 398)])
         gfxdraw.aapolygon(screen, [(205, 0), (203, 398), (803, 398)], (0, 0, 0))
         game.draw.polygon(screen, (56, 140, 70), [(200, 0), (200, 400), (800, 400)])
-        gfxdraw.aapolygon(screen, [(201, 0), (201, 400), (801, 400)], (56, 140, 70)) 
+        gfxdraw.aapolygon(screen, [(201, 0), (201, 400), (800, 399)], (56, 140, 70)) 
         game.draw.polygon(screen, (96, 180, 110), [(10, 105), (10, 325), (650, 325), (330, 105)])
         gfxdraw.aapolygon(screen, [(10, 105), (10, 325), (650, 325), (330, 105)], (96, 180, 110)) 
         
@@ -1098,9 +1128,10 @@ while running:
             if tutorialStage == 5:
                 writeText("Now you are ready!", "Arial", 20,255,255,255,675,30)
                 writeText("press space to", "Arial", 20,255,255,255,675,60)
-                writeText("explode a program", "Arial", 20,255,255,255,675,90)
+                writeText("go back!", "Arial", 20,255,255,255,675,90)
                 if key[game.K_SPACE]:
-                    running = False
+                    display = "title"
+                    atTitleStart = True
                 
 
         if player.rect.x == guideSquare.left and player.rect.y == guideSquare.top:
@@ -1161,7 +1192,7 @@ while running:
         writeText("BOMBS: " + str(bombsLeft), "Arial Black", 25,255,255,255,670,560)
 
         #logo image
-        newimage = game.transform.scale(game.image.load('images/oldicon1.png'), (150, 150))
+        newimage = game.transform.smoothscale(game.image.load('images/oldicon1.png'), (150, 150))
         screen.blit(newimage,(600,25))
 
         #logo text
