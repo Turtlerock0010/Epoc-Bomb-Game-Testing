@@ -76,7 +76,7 @@ class Player(game.sprite.Sprite):
         if os == "darwin":
             self.image = game.transform.scale(game.image.load("images/squareDesignsMac/playerSquare.svg").convert_alpha(), (25, 25))
         elif os == "win32":
-            self.image = game.transform.scale(game.image.load("images/squareDesignsWin/playerSquare.svg").convert_alpha(), (25, 25))
+            self.image = game.transform.smoothscale(game.image.load("images/squareDesignsWin/playerSquare.png").convert_alpha(), (25, 25))
         #self.image.fill((148, 3, 252))  # Purple color (RGB)
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -104,7 +104,7 @@ class Bomb(game.sprite.Sprite):
         if os == "darwin":
             self.image = game.transform.scale(game.image.load("images/squareDesignsMac/bombSquare.svg").convert_alpha(), (25, 25))
         elif os == "win32":
-            self.image = game.transform.scale(game.image.load("images/squareDesignsWin/bombSquare.png").convert_alpha(), (25, 25))
+            self.image = game.transform.smoothscale(game.image.load("images/squareDesignsWin/bombSquare.png").convert_alpha(), (25, 25))
         #self.image.fill((0, 0, 255))  # Purple color (RGB)
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -137,7 +137,7 @@ class Target(game.sprite.Sprite):
         if os == "darwin":
             self.image = game.transform.scale(game.image.load("images/squareDesignsMac/targetSquare.svg").convert_alpha(), (25, 25))
         elif os == "win32":
-            self.image = game.transform.scale(game.image.load("images/squareDesignsWin/targetSquare.png").convert_alpha(), (25, 25))
+            self.image = game.transform.smoothscale(game.image.load("images/squareDesignsWin/targetSquare.png").convert_alpha(), (25, 25))
         #self.image.fill((255, 0, 0))  # Red color (RGB)
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -169,7 +169,7 @@ class Shard(game.sprite.Sprite):
         if os == "darwin":
             self.image = game.transform.scale(game.image.load("images/squareDesignsMac/shardSquare.svg").convert_alpha(), (25, 25))
         elif os == "win32":
-            self.image = game.transform.scale(game.image.load("images/squareDesignsWin/shardSquare.png").convert_alpha(), (25, 25))
+            self.image = game.transform.smoothscale(game.image.load("images/squareDesignsWin/shardSquare.png").convert_alpha(), (25, 25))
         #self.image.fill((249, 147, 5))  # Orange color (RGB)
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -240,7 +240,7 @@ class Hole(game.sprite.Sprite):
         if os == "darwin":
             self.image = game.transform.scale(game.image.load("images/squareDesignsMac/holeSquare.svg").convert_alpha(), (25, 25))
         elif os == "win32":
-            self.image = game.transform.scale(game.image.load("images/squareDesignsWin/holeSquare.png").convert_alpha(), (25, 25))
+            self.image = game.transform.smoothscale(game.image.load("images/squareDesignsWin/holeSquare.png").convert_alpha(), (25, 25))
         #self.image.fill((0, 0, 0))  # yellow color (RGB)
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -268,7 +268,7 @@ class Diode(game.sprite.Sprite):
         if os == "darwin":
             self.image = game.transform.scale(game.image.load("images/squareDesignsMac/diodeSquare.svg").convert_alpha(), (25, 25))
         elif os == "win32":
-            self.image = game.transform.scale(game.image.load("images/squareDesignsWin/diodeSquare.png").convert_alpha(), (25, 25))
+            self.image = game.transform.smoothscale(game.image.load("images/squareDesignsWin/diodeSquare.png").convert_alpha(), (25, 25))
         #self.image.fill((0, 0, 0))  # yellow color (RGB)
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -344,12 +344,12 @@ class Laser(game.sprite.Sprite):
             if self.direction == "vertical":
                 self.image = game.transform.scale(game.image.load("images/squareDesignsMac/verticalLaser.svg").convert_alpha(), (25, 25))
             if self.direction == "horizontal":
-                self.image = game.transform.scale(game.image.load("images/squareDesignsMac/horizontalLaser.svg").convert_alpha(), (25, 25))
+                self.image = game.transform.smoothscale(game.image.load("images/squareDesignsMac/horizontalLaser.svg").convert_alpha(), (25, 25))
         elif os == "Windows":
             if self.direction == "vertical":
                 self.image = game.transform.scale(game.image.load("images/squareDesignsWin/verticalLaser.png").convert_alpha(), (25, 25))
             if self.direction == "horizontal":
-                self.image = game.transform.scale(game.image.load("images/squareDesignsWin/horizontalLaser.png").convert_alpha(), (25, 25))
+                self.image = game.transform.smoothscale(game.image.load("images/squareDesignsWin/horizontalLaser.png").convert_alpha(), (25, 25))
         #self.image.fill((0, 0, 0))  # yellow color (RGB)
         self.rect = self.image.get_rect()
         self.rect.x = x
