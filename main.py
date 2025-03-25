@@ -1,5 +1,5 @@
 # Epoc Bomb Game Thing
-# Version 27
+# Version 28
 # Developed by Turtlerock Industries led by @Commandline
 # A grid-based strategy game
 
@@ -66,6 +66,7 @@ playTitleTheme = game.mixer.Sound("sounds/titletheme.mp3")
 hit = game.mixer.Sound("sounds/hit.wav")
 explosion = game.mixer.Sound("sounds/explosion.wav")
 laserSFX = game.mixer.Sound("sounds/spaceLaser.wav")
+buttonSFX = game.mixer.Sound("sounds/playSFX.wav")
 playTitleTheme.play(-1)
 
 #--class init--
@@ -150,10 +151,11 @@ class Target(game.sprite.Sprite):
             self.kill()
             global score
             global targetsLeft
+            global hit
+
             if display == "game":
                 score += 100
             targetsLeft -= 1
-            global hit
             hit.play()
 
     def move(self, dx, dy):
@@ -360,7 +362,7 @@ class Laser(game.sprite.Sprite):
             self = None
 
     def update(self):
-        if game.sprite.spritecollideany(self, wall_group):
+        if game.sprite.spritecollideany(self, wall_group) or game.sprite.spritecollideany(self, diode_group):
             self.kill()
             del self
             self = None
@@ -375,172 +377,129 @@ class Laser(game.sprite.Sprite):
         # Update the sprite's position and store it
         self.rect.x = sx
         self.rect.y = sy
+
+
+class Particle(game.sprite.Sprite):
+    def __init__(self, particle, collisionGroup, x, y):
+        super().__init__()
+        self.particle = particle 
+        match self.particle:
+            case "laserParticle":
+                self.fadeLength = random.randint(15,25)
+                self.fadeTime = 0
+                self.alphaValue = 255
+                self.randomScale = random.randint(1,5)
+                self.randomSat = random.randint(0,128)
+                self.direction = self.randomDirection()
+                self.image = game.Surface([self.randomScale, self.randomScale], game.SRCALPHA)
+                self.image.fill((255, 0 + self.randomSat, 0 + self.randomSat, self.alphaValue))  # Gray color RGB ( 92, 92, 92)
+                self.rect = self.image.get_rect()
+                self.collisionGroup = collisionGroup
+                self.rect.x = x
+                self.rect.y = y
+            case "bombParticle":
+                #249, 147, 5
+                self.fadeLength = random.randint(15,25)
+                self.fadeTime = 0
+                self.alphaValue = 255
+                self.randomScale = random.randint(1,20)
+                self.randomSat = random.randint(0,64)
+                self.direction = self.randomDirection()
+                self.image = game.Surface([self.randomScale, self.randomScale], game.SRCALPHA)
+                self.image.fill((249, 147 + self.randomSat, 5 + self.randomSat, self.alphaValue))  # Gray color RGB ( 92, 92, 92)
+                self.rect = self.image.get_rect()
+                self.collisionGroup = collisionGroup
+                self.rect.x = x
+                self.rect.y = y
+    
+    def randomDirection(self):
+        angle = random.uniform(0, 2 * math.pi)  # Random angle in radians
+        return math.cos(angle), math.sin(angle)
+
+    def update(self):
+        self.fadeTime += 1
+        self.image.set_alpha(self.alphaValue)
+        self.alphaValue -= 255/self.fadeLength
+        if self.fadeTime < self.fadeLength:
+            self.rect.x += self.direction[0] * 5
+            self.rect.y += self.direction[1] * 5
+
+            match self.particle:
+                case "laserParticle":
+                    if game.sprite.spritecollideany(self, diode_group):
+                        self.image.set_alpha(0)
+                case "bombParticle":
+                    pass
+            
+            if game.sprite.spritecollideany(self, self.collisionGroup):
+                self.kill()
+                del self
+                self = None
+        else:
+            self.kill()
+            del self
+            self = None
 #--end of class init--
 
 
 #--function init--
-def createTargetsTitle():
-    randomSquare = [random.randint(5,21)*25,random.randint(0,16)*25]
-
-    #top target
-    targets = Target(randomSquare[0], randomSquare[1], 25, 25)
-    title_sprites.add(targets)
-    for i in range(random.randint(1,20)):
-        targets.move(0,-25)
-        if game.sprite.collide_rect(targets, topBorderTitle):
-            targets.move(0,25)
-    
-    #bottom target
-    targets = Target(randomSquare[0], randomSquare[1], 25, 25)
-    title_sprites.add(targets)
-    for i in range(random.randint(1,20)):
-        targets.move(0,25)
-        if game.sprite.collide_rect(targets, bottomBorderTitle):
-            targets.move(0,-25)
-    
-    #left target
-    targets = Target(randomSquare[0], randomSquare[1], 25, 25)
-    title_sprites.add(targets)
-    for i in range(random.randint(1,20)):
-        targets.move(-25, 0)
-        if game.sprite.collide_rect(targets, leftBorderTitle):
-            targets.move(25, 0)
-    
-    #right target
-    targets = Target(randomSquare[0], randomSquare[1], 25, 25)
-    title_sprites.add(targets)
-    for i in range(random.randint(1,20)):
-        targets.move(25, 0)
-        if game.sprite.collide_rect(targets, rightBorderTitle):
-            targets.move(-25, 0)
-    
-    #top-left target
-    targets = Target(randomSquare[0], randomSquare[1], 25, 25)
-    title_sprites.add(targets)
-    for i in range(random.randint(1,20)):
-        targets.move(0, -25)
-        targets.move(-25, 0)
-        if game.sprite.collide_rect(targets, topBorderTitle) or game.sprite.collide_rect(targets, leftBorderTitle):
-            targets.move(0, 25)
-            targets.move(25, 0)
-    
-    #top-right target
-    targets = Target(randomSquare[0], randomSquare[1], 25, 25)
-    title_sprites.add(targets)
-    for i in range(random.randint(1,20)):
-        targets.move(0, -25)
-        targets.move(25, 0)
-        if game.sprite.collide_rect(targets, topBorderTitle) or game.sprite.collide_rect(targets, rightBorderTitle):
-            targets.move(0, 25)
-            targets.move(-25, 0)
-    
-    #bottom-left target
-    targets = Target(randomSquare[0], randomSquare[1], 25, 25)
-    title_sprites.add(targets)
-    for i in range(random.randint(1,20)):
-        targets.move(0, 25)
-        targets.move(-25, 0)
-        if game.sprite.collide_rect(targets, bottomBorderTitle) or game.sprite.collide_rect(targets, leftBorderTitle):
-            targets.move(0, -25)
-            targets.move(25, 0)
-    
-    #bottom-right target
-    targets = Target(randomSquare[0], randomSquare[1], 25, 25)
-    title_sprites.add(targets)
-    for i in range(random.randint(1,20)):
-        targets.move(0, 25)
-        targets.move(25, 0)
-        if game.sprite.collide_rect(targets, bottomBorderTitle) or game.sprite.collide_rect(targets, rightBorderTitle):
-            targets.move(0, -25)
-            targets.move(-25, 0)
-
-
-def createTargets():
-    randomSquare = [random.randint(1,21)*25,random.randint(1,21)*25]
+def createTargets(renderGroup, collisionGroup, xRange, yRange):
+    #create point to stem targets off of
+    randomSquare = [random.randint(xRange[0],xRange[1])*25,random.randint(yRange[0],yRange[1])*25]
     targetList.append(randomSquare)
 
-    #top target
-    targets = Target(randomSquare[0], randomSquare[1], 25, 25)
-    all_sprites.add(targets)
-    target_group.add(targets)
-    for i in range(random.randint(1,20)):
-        targets.move(0,-25)
-        if game.sprite.collide_rect(targets, topBorder):
-            targets.move(0,25)
-    
-    #bottom target
-    targets = Target(randomSquare[0], randomSquare[1], 25, 25)
-    all_sprites.add(targets)
-    target_group.add(targets)
-    for i in range(random.randint(1,20)):
-        targets.move(0,25)
-        if game.sprite.collide_rect(targets, bottomBorder):
-            targets.move(0,-25)
-    
-    #left target
-    targets = Target(randomSquare[0], randomSquare[1], 25, 25)
-    all_sprites.add(targets)
-    target_group.add(targets)
-    for i in range(random.randint(1,20)):
-        targets.move(-25, 0)
-        if game.sprite.collide_rect(targets, leftBorder):
-            targets.move(25, 0)
-    
-    #right target
-    targets = Target(randomSquare[0], randomSquare[1], 25, 25)
-    all_sprites.add(targets)
-    target_group.add(targets)
-    for i in range(random.randint(1,20)):
-        targets.move(25, 0)
-        if game.sprite.collide_rect(targets, rightBorder):
-            targets.move(-25, 0)
-    
-    #top-left target
-    targets = Target(randomSquare[0], randomSquare[1], 25, 25)
-    all_sprites.add(targets)
-    target_group.add(targets)
-    for i in range(random.randint(1,20)):
-        targets.move(0, -25)
-        targets.move(-25, 0)
-        if game.sprite.collide_rect(targets, topBorder) or game.sprite.collide_rect(targets, leftBorder):
-            targets.move(0, 25)
-            targets.move(25, 0)
-    
-    #top-right target
-    targets = Target(randomSquare[0], randomSquare[1], 25, 25)
-    all_sprites.add(targets)
-    target_group.add(targets)
-    for i in range(random.randint(1,20)):
-        targets.move(0, -25)
-        targets.move(25, 0)
-        if game.sprite.collide_rect(targets, topBorder) or game.sprite.collide_rect(targets, rightBorder):
-            targets.move(0, 25)
-            targets.move(-25, 0)
-    
-    #bottom-left target
-    targets = Target(randomSquare[0], randomSquare[1], 25, 25)
-    all_sprites.add(targets)
-    target_group.add(targets)
-    for i in range(random.randint(1,20)):
-        targets.move(0, 25)
-        targets.move(-25, 0)
-        if game.sprite.collide_rect(targets, bottomBorder) or game.sprite.collide_rect(targets, leftBorder):
-            targets.move(0, -25)
-            targets.move(25, 0)
-    
-    #bottom-right target
-    targets = Target(randomSquare[0], randomSquare[1], 25, 25)
-    all_sprites.add(targets)
-    target_group.add(targets)
-    for i in range(random.randint(1,20)):
-        targets.move(0, 25)
-        targets.move(25, 0)
-        if game.sprite.collide_rect(targets, bottomBorder) or game.sprite.collide_rect(targets, rightBorder):
-            targets.move(0, -25)
-            targets.move(-25, 0)
+    #target generation
+    for tile in range(8): #for the 8 targets
+        targets = Target(randomSquare[0], randomSquare[1], 25, 25)
+        renderGroup.add(targets)
+        target_group.add(targets)
+        for i in range(random.randint(1,20)):
+            match tile:
+                case 0:
+                    targets.move(0,-25) #move forward up
+                case 1:
+                    targets.move(0,25) #move forward down
+                case 2:
+                    targets.move(-25, 0) #move forward left
+                case 3:
+                    targets.move(25, 0) #move forward right
+                case 4:
+                    targets.move(0, -25) #move forward up & left
+                    targets.move(-25, 0)
+                case 5:
+                    targets.move(0, -25) #move forward up & right
+                    targets.move(25, 0)
+                case 6:
+                    targets.move(0, 25) #move forward down & left
+                    targets.move(-25, 0)
+                case 7:
+                    targets.move(0, 25) #move forward down & right
+                    targets.move(25, 0)
+            if game.sprite.spritecollideany(targets, collisionGroup):
+                match tile:
+                    case 0:
+                        targets.move(0,25) #move backward up
+                    case 1:
+                        targets.move(0,-25) #move backward down
+                    case 2:
+                        targets.move(25, 0) #move backward left
+                    case 3:
+                        targets.move(-25, 0) #move backward right
+                    case 4:
+                        targets.move(0, 25) #move backward up & left
+                        targets.move(25, 0)
+                    case 5:
+                        targets.move(0, 25) #move backward up & right
+                        targets.move(-25, 0)
+                    case 6:
+                        targets.move(0, -25) #move backward down & left
+                        targets.move(25, 0)
+                    case 7:
+                        targets.move(0, -25) #move backward down & right
+                        targets.move(-25, 0)
 
 
-def writeText(input, textfont, fontsize, R, G, B, X, Y):
+def writeText(input, textfont, fontsize, R, G, B, X, Y): #writes text on a screen
     font = game.font.SysFont(textfont, fontsize)
     textwrite = font.render(input, True, (R, G, B))
     textRectwrite = textwrite.get_rect()
@@ -548,7 +507,8 @@ def writeText(input, textfont, fontsize, R, G, B, X, Y):
     screen.blit(textwrite, textRectwrite)
 
 
-def movement(collisionGroup):
+def movement(collisionGroup): #handles player movement
+    #function initalization
     key = game.key.get_pressed()
     global lastMoveTime
     global touchedByLaser
@@ -576,12 +536,14 @@ def movement(collisionGroup):
                 player.move(0,25)
         lastMoveTime = 0.0
     
+    #checks if player touches laser
     if game.sprite.spritecollideany(player, laser_group) and not touchedByLaser:
         touchedByLaser = True
         global bombsLeft
         global bombCooldown
         global spacebarWait
 
+        #places all bombs at player position and explodes them
         for i in range(bombsLeft):
             bombX.append(player.rect.x)
             bombY.append(player.rect.y)
@@ -601,6 +563,9 @@ def movement(collisionGroup):
                 bombX.clear()
                 bombY.clear()
                 explosion.play()
+                for i in range(20):
+                    particle = Particle("bombParticle", wall_group, bomb.rect.x + 12.5, bomb.rect.y + + 12.5)
+                    all_sprites.add(particle)
             #possibly important code: bombsLeft = -1
 
 
@@ -633,6 +598,9 @@ def bombPlacement():
                     bombX.clear()
                     bombY.clear()
                     explosion.play()
+                    for i in range(20):
+                        particle = Particle("bombParticle", wall_group, bomb.rect.x + 12.5, bomb.rect.y + + 12.5)
+                        all_sprites.add(particle)
                 #possibly important code: bombsLeft = -1
     if not key[game.K_SPACE]:
         spacebarWait = False
@@ -734,12 +702,13 @@ creditsButtonShadow = game.Rect(278,503,228,78)
 tutorialButton = game.Rect(525,500,225,75)
 tutorialButtonShadow = game.Rect(528,503,228,78)
 creditsBox = game.Rect(100,100,600,600)
-creditsBoxShadow = game.Rect(95,95,610,610)
+creditsBoxShadow = game.Rect(85,85,630,630)
 coverbox1 = game.Rect(0,0,200,600)
 coverbox2 = game.Rect(200,400,600,200)
 shadowBox = game.Surface((800, 600))
 shadowBox.fill((0,0,0))
 
+#bar coordinates and size intialization
 barW = 230
 barH = 10
 BarX = 25
@@ -757,7 +726,6 @@ guideSquare = game.Rect(25,25,25,25)
 
 #---end of game init---
 
-#adds test targets for player use
 
 #game loop
 running = True
@@ -769,13 +737,14 @@ while running:
     #sound controls
     key = game.key.get_pressed()
     if key[game.K_m]:
-        if volume:
+        if volume: #mutes all sounds
             playTitleTheme.set_volume(0) 
             hit.set_volume(0)
             explosion.set_volume(0)
             laserSFX.set_volume(0)
+            buttonSFX.set_volume(0)
             volume = False
-        else:
+        else: #unmutes all sounds
             if display == "title":
                 playTitleTheme.set_volume(1) 
             if display == "game" or display == "tutorial":
@@ -783,6 +752,7 @@ while running:
             hit.set_volume(1)
             explosion.set_volume(1)
             laserSFX.set_volume(1)
+            buttonSFX.set_volume(1)
             volume = True
     
     #mouse checks
@@ -801,14 +771,14 @@ while running:
         if atTitleStart:
             atTitleStart = False
             for i in range(10):
-                createTargetsTitle()
+                createTargets(title_sprites, wall_group_title, (5,21), (0,16))
             player.goto(400,100)
 
         #dev keys
 
         #--creates a set of new targets
         if key[game.K_k]:
-            createTargetsTitle()
+            createTargets(title_sprites, wall_group_title, (5,21), (0,16))
         
         #--deletes all existing targets
         if key[game.K_l]:
@@ -857,21 +827,21 @@ while running:
         writeText("Game Thing", "impact", 100,255,255,255,255,260)
 
         #boxes
-        if playButton.collidepoint(mousePos):
+        if playButton.collidepoint(mousePos): #checks if mouse is touching play button
             game.draw.rect(screen, (96, 180, 110), playButtonShadow, border_radius=10)
             game.draw.rect(screen, (116, 200, 130), playButton, border_radius=10)
         else:
             game.draw.rect(screen, (76, 160, 90), playButtonShadow, border_radius=10)
             game.draw.rect(screen, (96, 180, 110), playButton, border_radius=10)
 
-        if creditsButton.collidepoint(mousePos):
+        if creditsButton.collidepoint(mousePos): #checks if mouse is touching credits button
             game.draw.rect(screen, (96, 180, 110), creditsButtonShadow, border_radius=10)
             game.draw.rect(screen, (116, 200, 130), creditsButton, border_radius=10)
         else:
             game.draw.rect(screen, (76, 160, 90), creditsButtonShadow, border_radius=10)
             game.draw.rect(screen, (96, 180, 110), creditsButton, border_radius=10)
 
-        if tutorialButton.collidepoint(mousePos):
+        if tutorialButton.collidepoint(mousePos): #checks if mouse is touching tutorial button
             game.draw.rect(screen, (96, 180, 110), tutorialButtonShadow, border_radius=10)
             game.draw.rect(screen, (116, 200, 130), tutorialButton, border_radius=10)
         else:
@@ -903,15 +873,19 @@ while running:
         if not key[game.K_q] and not key[game.K_e]:
             navigationButtonPressed = False
 
-        if buttonIndex == 1:
-            BarX = 25
-        elif buttonIndex == 2:
-            BarX = 275
-        elif buttonIndex == 3:
-            BarX = 525
+        #sets the bar position based off of index
+        match buttonIndex:
+            case 1:
+                BarX = 25
+            case 2:
+                BarX = 275
+            case 3:
+                BarX = 525
         
+        #refreshes bar position
         game.draw.rect(screen, (255, 255, 255), (BarX, BarY, barW, barH), border_radius=10)
 
+        #checks if requirements for credits to appear is true then shows credits
         if key[game.K_c] or (key[game.K_RETURN] and buttonIndex == 2) or (creditsButton.collidepoint(mousePos) and mouseButtons[0]):
             playTitleTheme.set_volume(.25)
             rect_surface = game.Surface((800, 600), game.SRCALPHA)
@@ -919,17 +893,18 @@ while running:
             screen.blit(rect_surface, (0, 0))
             game.draw.rect(screen, (76, 160, 90), creditsBoxShadow, border_radius=50)
             game.draw.rect(screen, (96, 180, 110), creditsBox, border_radius=50)
-            writeText("Credits", "impact", 50,0,0,0,405,155)
+            writeText("Credits", "impact", 50,0,0,0,403,153)
             writeText("Credits", "impact", 50,255,255,255,400,150)
-            writeText("Created by @Turtlerock0010", "Arial",30,255,255,255,400,225)
-            writeText("Inspired by Build A Boat", "Arial",30,255,255,255,400,260)
-            writeText("Epoc Bomb Game Thing, A", "Arial",30,255,255,255,400,335)
-            writeText("Continuation of Epic Bomb", "Arial",30,255,255,255,400,370)
-            writeText("Game On Scratch", "Arial",30,255,255,255,400,405)
-            writeText("Hint: Did you know you can", "Arial",30,255,255,255,400,450+50)
-            writeText("mess around in the title?", "Arial",30,255,255,255,400,475+50)
-            writeText("Use WASD, U and K", "Arial",30,255,255,255,400,500+50)
+            writeText("Created by @Turtlerock0010", "Arial Black",30,255,255,255,400,225)
+            writeText("Inspired by Build A Boat", "Arial Black",30,255,255,255,400,260)
+            writeText("Epoc Bomb Game Thing, A", "Arial Black",30,255,255,255,400,335)
+            writeText("Continuation of Epic Bomb", "Arial Black",30,255,255,255,400,370)
+            writeText("Game On Scratch", "Arial Black",30,255,255,255,400,405)
+            writeText("Hint: Did you know you can", "Arial Black",30,255,255,255,400,450+50)
+            writeText("mess around in the title?", "Arial Black",30,255,255,255,400,475+50)
+            writeText("Use WASD, U and K", "Arial Black",30,255,255,255,400,500+50)
         
+        #when at start a black box fades out
         if shadowBoxStart:
             shadowBoxAlpha -= 10
             shadowBox.set_alpha(shadowBoxAlpha)
@@ -937,25 +912,30 @@ while running:
         if shadowBoxAlpha < 0:
             shadowBoxStart = False
         
+        #sets music back to normal after clicking the c button
         if not (key[game.K_c] or (key[game.K_RETURN] and buttonIndex == 2 or (creditsButton.collidepoint(mousePos) and mouseButtons[0]))):
             playTitleTheme.set_volume(1)
         
+        #if the requirements for a tutorial is met then the game sets the tutorial and brings the player
         if key[game.K_t] or (key[game.K_RETURN] and buttonIndex == 3) or (tutorialButton.collidepoint(mousePos) and mouseButtons[0]):
-                    display = "tutorial"
-                    playTitleTheme.set_volume(.25)
-                    player.goto(275,275)
+            buttonSFX.play()
+            display = "tutorial"
+            playTitleTheme.set_volume(.25)
+            player.goto(275,275)
+            targetsLeft = 0
+            for target in title_sprites.sprites():
+                if isinstance(target, Target):
+                    title_sprites.remove(target)
                     targetsLeft = 0
-                    for target in title_sprites.sprites():
-                        if isinstance(target, Target):
-                            title_sprites.remove(target)
-                            targetsLeft = 0
-                            target.kill()
-                            del target
-                            target = None
-                    targetList.clear()
-                    shard_group.empty()
+                    target.kill()
+                    del target
+                    target = None
+            targetList.clear()
+            shard_group.empty()
 
+        #if the requirements for a game to be shown it will set up the game and start the game loop
         if key[game.K_b] or (key[game.K_RETURN] and buttonIndex == 1 or (playButton.collidepoint(mousePos) and mouseButtons[0])):
+            buttonSFX.play()
             display = "game"
             playTitleTheme.set_volume(.25)
             player.goto(275,275)
@@ -987,8 +967,6 @@ while running:
         game.draw.rect(screen, (96, 180, 110), tutorialBox, border_radius=10)
         game.draw.rect(screen, (239, 245, 66), guideSquare)
 
-
-
         #--End of Detail Draw--
 
         movement(wall_group)
@@ -999,6 +977,7 @@ while running:
         #check shards
         shardsLeft = len([s for s in shard_group if isinstance(s, Shard)])
 
+        #code that runs at tutorial start
         if tutorialOnce:
             tutorialOnce = False
             guideSquare.left = random.randint(1,21) * 25
@@ -1012,17 +991,18 @@ while running:
                 tutorialLoad = True
             if tutorialStage == 4:
                 bombsLeft = 2
-                createTargets()
-                createTargets()
+                for i in range(2):
+                    createTargets(all_sprites, wall_group, (1,21), (1,21))
         
+        #I have no idea what this is for probably going to redo the tutorial
         if tutorialLoad:
             if tutorialStage == 3:
                 bombsLeft = 1
-                createTargets()
+                createTargets(all_sprites, wall_group, (1,21), (1,21))
             if tutorialStage == 4:
                 bombsLeft = 2
-                createTargets()
-                createTargets()
+                createTargets(all_sprites, wall_group, (1,21), (1,21))
+                createTargets(all_sprites, wall_group, (1,21), (1,21))
             tutorialLoad = False
 
         #tutorial system
@@ -1077,13 +1057,16 @@ while running:
 
                 bombPlacement()
 
+                #start checks
                 if shardsLeft == 8:
                     shardsLoaded = True
 
+                #runtime checks
                 if targetsLeft == 0:
                     tutorial3pass = True
                     shardsLoaded = False
                 
+                #checks for failed completion of the round
                 if shardsLoaded and shardsLeft == 0:
                     shardsLoaded = False
                     for target in all_sprites.sprites():
@@ -1106,13 +1089,16 @@ while running:
 
                 bombPlacement()
                 
+                #start checks
                 if shardsLeft == 16:
                     shardsLoaded = True
 
+                #runtime checks
                 if targetsLeft == 0:
                     tutorial3pass = True
                     shardsLoaded = False
                 
+                #checks for failed completion of the round
                 if shardsLoaded and shardsLeft == 0:
                     shardsLoaded = False
                     for target in all_sprites.sprites():
@@ -1125,6 +1111,7 @@ while running:
                     targetList.clear()
                     shardsLoaded = False
                     tutorialLoad = True
+            
             if tutorialStage == 5:
                 writeText("Now you are ready!", "Arial", 20,255,255,255,675,30)
                 writeText("press space to", "Arial", 20,255,255,255,675,60)
@@ -1206,9 +1193,10 @@ while running:
         #player actions
         movement(wall_group)
         bombPlacement()
-        #dev keys
+
+        #--dev keys--
         if key[game.K_k]:
-            createTargets()
+            createTargets(all_sprites, wall_group, (1,21), (1,21))
         if key[game.K_l]:
             for target in all_sprites.sprites():
                 if isinstance(target, Target):
@@ -1235,24 +1223,37 @@ while running:
             for diode in diode_group.sprites():
                 if isinstance(diode, Diode):
                     diode.destroyLasers()
+        
+        if key[game.K_t]:
+            for i in range(5):
+                particle = Particle("laserParticle", wall_group, player.rect.x, player.rect.y)
+                all_sprites.add(particle)
+        #--end of dev keys--
 
+        #laser checks
         laserTimer += 1
-        if not laserOn and laserTimer == 180:
+        if not laserOn and laserTimer == 180: #checks if lasers can be on
             laserOn = True
             laserTimer = 0.0
             for diode in diode_group.sprites():
                 if isinstance(diode, Diode):
                     diode.makeLasers()
         
-        if laserOn and laserTimer == 180:
+        if laserOn and laserTimer == 180: #checks if lasers can be off
             laserOn = False
             laserTimer = 0.0
             for diode in diode_group.sprites():
                 if isinstance(diode, Diode):
                     diode.destroyLasers()
         
+        if laserOn: #checks if lasers are on
+            for diode in diode_group.sprites():
+                if isinstance(diode, Diode):
+                    for i in range(5):
+                        particle = Particle("laserParticle", wall_group, diode.rect.x + 12.5, diode.rect.y + 12.5)
+                        all_sprites.add(particle)
 
-
+        #left behind code :(
         if bombCooldown > 0:
             bombCooldown -= 1
 
@@ -1267,6 +1268,7 @@ while running:
             if not roundStarted:
                 touchedByLaser = False
                 laserTimer = 0.0
+                laserOn = False
                 for hole in all_sprites.sprites():
                     if isinstance(hole, Hole):
                         all_sprites.remove(hole)
@@ -1282,70 +1284,71 @@ while running:
                         diode = None
                 roundStarted = True
                 if round < 4:
-                    createTargets()
+                    createTargets(all_sprites, wall_group, (1,21), (1,21))
                     bombsLeft = 1
+                    createDiode()
                 elif round < 7:
-                    createTargets()
-                    createTargets()
+                    createTargets(all_sprites, wall_group, (1,21), (1,21))
+                    createTargets(all_sprites, wall_group, (1,21), (1,21))
                     bombsLeft = 2
                 elif round < 10:
-                    createTargets()
-                    createTargets()
-                    createTargets()
+                    createTargets(all_sprites, wall_group, (1,21), (1,21))
+                    createTargets(all_sprites, wall_group, (1,21), (1,21))
+                    createTargets(all_sprites, wall_group, (1,21), (1,21))
                     bombsLeft = 3
                 elif round < 13:
-                    createTargets()
+                    createTargets(all_sprites, wall_group, (1,21), (1,21))
                     bombsLeft = 1
                     for i in range(10):
                         createHole()
                 elif round < 16:
-                    createTargets()
-                    createTargets()
+                    createTargets(all_sprites, wall_group, (1,21), (1,21))
+                    createTargets(all_sprites, wall_group, (1,21), (1,21))
                     for i in range(20):
                         createHole()
                     bombsLeft = 2
                 elif round < 19:
-                    createTargets()
-                    createTargets()
-                    createTargets()
+                    createTargets(all_sprites, wall_group, (1,21), (1,21))
+                    createTargets(all_sprites, wall_group, (1,21), (1,21))
+                    createTargets(all_sprites, wall_group, (1,21), (1,21))
                     for i in range(30):
                         createHole()
                     bombsLeft = 3
                 elif round < 22:
-                    createTargets()
+                    createTargets(all_sprites, wall_group, (1,21), (1,21))
                     bombsLeft = 1
                     createDiode()
                 elif round < 25:
-                    createTargets()
-                    createTargets()
+                    createTargets(all_sprites, wall_group, (1,21), (1,21))
+                    createTargets(all_sprites, wall_group, (1,21), (1,21))
                     bombsLeft = 2
                     for i in range(3):
                         createDiode()
                 elif round < 28:
-                    createTargets()
-                    createTargets()
-                    createTargets()
+                    createTargets(all_sprites, wall_group, (1,21), (1,21))
+                    createTargets(all_sprites, wall_group, (1,21), (1,21))
+                    createTargets(all_sprites, wall_group, (1,21), (1,21))
                     bombsLeft = 3
                     for i in range(5):
                         createDiode()
                 elif round < 31:
-                    createTargets()
+                    createTargets(all_sprites, wall_group, (1,21), (1,21))
                     bombsLeft = 1
                     createDiode()
                     for i in range(10):
                         createHole()
                 elif round < 34:
-                    createTargets()
-                    createTargets()
+                    createTargets(all_sprites, wall_group, (1,21), (1,21))
+                    createTargets(all_sprites, wall_group, (1,21), (1,21))
                     bombsLeft = 2
                     for i in range(3):
                         createDiode()
                     for i in range(30):
                         createHole()
                 elif round < 37:
-                    createTargets()
-                    createTargets()
-                    createTargets()
+                    createTargets(all_sprites, wall_group, (1,21), (1,21))
+                    createTargets(all_sprites, wall_group, (1,21), (1,21))
+                    createTargets(all_sprites, wall_group, (1,21), (1,21))
                     bombsLeft = 3
                     for i in range(5):
                         createDiode()
@@ -1395,6 +1398,7 @@ while running:
                     roundStarted = False
                     shardsLoaded = False
             
+            #checks for failed completion of a round
             if shardsLoaded and shardsLeft == 0:
                 shardsLoaded = False
                 for target in all_sprites.sprites():
