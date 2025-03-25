@@ -129,3 +129,17 @@ Ok so I wanted to upload this project to Itch.io, so inorder to do it I would ne
 #### (Goals)
 - Better tutorial transitions
 - Possibly more transitions
+
+### Version 28, Particle Update and Future Direction
+Woah! Future direction! Will happen? You may ask. Well I have been thinking about this for a while, and I always want the best for this game which means that I will try my best to watch this game succeed. This vision, has inturn reached to a point where I can no longer support the game in it's current state as despite my numerous attempts to fixing issues that have been plaguing the game for some time such as actually playing the game, using the exe files, and code readibility it has become more of a hassle to maintain overtime thus action will need to be done. **This does NOT mean depreciation of the game!** Instead see this as more of a new beginning. I will work on a complete rewrite of the game on an actual game engine making sure that all of the problems are fixed and the rewrite state is on par with Version 22, so maybe within a week or 2 you will see this vision come to light and if possible I will make the game open source for everyone to see. But for now, without further a do, changelogs for Version 28 Particles Update.
+
+#### (Keynotes)
+- Added Laser and Bomb Particles
+
+#### (Explanation)
+- New class called particles added
+- laser diodes now give off a particle
+- bombs when exploded give off a particle
+
+#### (Goals)
+- No **g**oals here t**o**night, but only hopes an**d** dreams, **o**nly **t**ime is needed, but it will make a difference.
